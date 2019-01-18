@@ -3,6 +3,8 @@ import os
 import sys
 
 if __name__ == "__main__":
+    # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings")
+    # 添加修改后的配置路径
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings.dev")
     try:
         from django.core.management import execute_from_command_line
