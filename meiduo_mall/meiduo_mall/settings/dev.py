@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # 自建
-    'users.apps.UserConfig',
+    'users.apps.UsersConfig',
 ]
 
 # 重新指定用户模型类
