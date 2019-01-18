@@ -198,3 +198,7 @@ LOGGING = {
         },
     }
 }
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler'
+}
