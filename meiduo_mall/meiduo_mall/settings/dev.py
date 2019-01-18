@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # /meiduo/meiduo_mall/meiduo_mall
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# 为apps中的子应用添加导包路径
+sys.path.insert(0,os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -44,8 +47,12 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # 自建
-    'meiduo_mall.apps.users.apps.UserConfig',
+    'users.apps.UserConfig',
 ]
+
+# 重新指定用户模型类
+AUTH_USER_MODEL = 'users.User'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -150,7 +157,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-
+# 添加日志配置
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
