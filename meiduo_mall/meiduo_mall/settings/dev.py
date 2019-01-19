@@ -29,7 +29,7 @@ SECRET_KEY = 'crjyg*wri(ck5^3+!*etzxpov9fhtfwv9+#h6zcmi07y$jph75'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.meiduo.site', 'api.meiduo.site']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # ----------第三方应用----------
     'rest_framework',
+    'corsheaders',
 
     # ----------自建应用----------
     # 用户模型应用
@@ -58,6 +59,8 @@ AUTH_USER_MODEL = 'users.User'
 
 
 MIDDLEWARE = [
+    # 添加跨域请求中间件
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -205,3 +208,12 @@ LOGGING = {
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler'
 }
+
+# 跨域请求白名单
+CORS_ORIGIN_WHITELIST = (
+    '127.0.0.1:8080',
+    'localhost:8080',
+    'www.meiduo.site:8080',
+    'api.meiduo.site:8000'
+)
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
