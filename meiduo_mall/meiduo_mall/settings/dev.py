@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.40.131',  # 数据库主机(虚拟机,固定ip)
+        'HOST': '127.0.0.1',  # 数据库主机(虚拟机,固定ip)
         'PORT': 3306,  # 数据库端口
         'USER': 'meiduo',  # 数据库用户名
         'PASSWORD': 'meiduo',  # 数据库用户密码
@@ -115,7 +115,7 @@ CACHES = {
     },
     "session": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/1",
+        "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -215,6 +215,5 @@ CORS_ORIGIN_WHITELIST = (
     'localhost:8080',
     'www.meiduo.site:8080',
     'api.meiduo.site:8000',
-    '192.168.40.131',
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie

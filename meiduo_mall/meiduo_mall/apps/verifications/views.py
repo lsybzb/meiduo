@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
@@ -7,9 +7,9 @@ from random import randint
 from django_redis import get_redis_connection
 import logging
 
-from meiduo_mall.libs.yuntongxun.sms import CCP
 
 from . import constants
+from celery_tasks.sms import tasks as sms_tasks
 
 # 日志生成器
 logger = logging.getLogger('django')
@@ -18,7 +18,7 @@ logger = logging.getLogger('django')
 # Create your views here.
 
 # /sms_codes/(?P<mobile>1[3-9]\d{9})/
-class SMSCodeView(APIView):
+class SMSCodeView(GenericAPIView):
     """
     向手机发送验证码
     """
@@ -56,7 +56,10 @@ class SMSCodeView(APIView):
         pl.execute()
 
         # 4.利用容联云通讯发短信
-        CCP().send_template_sms(mobile, [sms_cdoe, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
+        # CCP().send_template_sms(mobile, [sms_cdoe, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
+
+        sms_code_expires = str(constants.SMS_CODE_REDIS_EXPIRES // 60)
+        sms_tasks.send_sms_code.delay(mobile, sms_cdoe, sms_code_expires)
 
         # 响应发送验证码结果
         return Response({'message': "OK"})
