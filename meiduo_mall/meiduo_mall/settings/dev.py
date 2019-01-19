@@ -35,7 +35,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # 原生应用
+    # ----------自带----------
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,11 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 第三方
+    # ----------第三方应用----------
     'rest_framework',
 
-    # 自建
+    # ----------自建应用----------
+    # 用户模型应用
     'users.apps.UsersConfig',
+    # 短信验证码
+    'verifications.apps.VerificationsConfig',
 ]
 
 # 重新指定用户模型类
