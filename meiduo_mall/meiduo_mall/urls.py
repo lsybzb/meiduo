@@ -15,9 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from .apps.verifications import urls as verifications_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^verifications/', include(verifications_urls)),
+    url(r'', include('verifications.urls')),
 ]
