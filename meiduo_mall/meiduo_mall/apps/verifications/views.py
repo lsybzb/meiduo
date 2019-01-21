@@ -37,7 +37,7 @@ class SMSCodeView(GenericAPIView):
         """
 
         # 1.创建redis连接
-        redis_conn = get_redis_connection()
+        redis_conn = get_redis_connection('verify_code')
 
         # 2.检查是否60秒内已发送过验证码,
         send_flag = redis_conn.get('sms_flag_%s' % mobile)
