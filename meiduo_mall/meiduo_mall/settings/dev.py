@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     # ----------自建应用----------
     # 用户模型应用
     'users.apps.UsersConfig',
+    'oauth.apps.OauthConfig',
     # 短信验证码
     'verifications.apps.VerificationsConfig',
 ]

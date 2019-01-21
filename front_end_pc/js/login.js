@@ -72,7 +72,7 @@ var vm = new Vue({
                         location.href = return_url;
                     })
                     .catch(error => {
-                        if (error.response.status == 400) {
+                        if (error.status == 400) {
                             this.error_pwd_message = '用户名或密码错误';
                         } else {
                             this.error_pwd_message = '服务器错误';
@@ -91,7 +91,7 @@ var vm = new Vue({
                     location.href = response.data.login_url;
                 })
                 .catch(error => {
-                    console.log(error.response.data);
+                    console.log(error.data);
                 })
         }
     }
