@@ -23,7 +23,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
     allow = serializers.CharField(label="同意协议", write_only=True)
     token = serializers.CharField(label="jwt令牌", read_only=True)
 
-
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'password2', 'mobile', 'sms_code', 'allow', 'token']
@@ -106,7 +105,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('id', 'username', 'mobile', 'email', 'email_active')
@@ -114,6 +112,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.ModelSerializer):
     """保存邮箱的序列化器"""
+
     class Meta:
         model = User
         fields = ('id', 'email')
