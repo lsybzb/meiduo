@@ -88,7 +88,7 @@ class QQAuthUserView(GenericAPIView):
             # 8.构造返回数据
             data = {
                 "token": token,
-                "user_id": user.user.id,
+                "user_id": user.id,
                 "username": user.username
             }
             return Response(data)

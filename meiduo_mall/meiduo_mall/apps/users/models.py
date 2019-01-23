@@ -11,6 +11,8 @@ class User(AbstractUser):
     """
     # 添加额外的手机号码字段
     mobile = models.CharField(max_length=11, unique=True, verbose_name="手机号码")
+    # 添加邮箱是否验证
+    email_active = models.BooleanField(verbose_name="邮箱验证状态", default=False)
 
     class Meta:
         db_table = 'tb_user'

@@ -8,6 +8,7 @@ from users.models import User
 
 class CreateUserSerializer(serializers.ModelSerializer):
     """
+    新建用户序列化器类
     1.传入参数:
     username, password, password2, sms_code, mobile, allow
     2.验证手机格式是否正确
@@ -101,3 +102,12 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user.token = token
 
         return user
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'mobile', 'email', 'email_active')
+
+
