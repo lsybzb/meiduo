@@ -40,8 +40,16 @@ class User(AbstractUser):
         """验证邮箱"""
 
         serializer = TJWSerializer(settings.SECRET_KEY, expires_in=constants.VERIFY_EMAIL_TOKEN_EXPIRES)
-
+        # 验证邮箱数据
         try:
             data = serializer.loads(token)
         except BadData:
             return None
+        user_id = data.get('user_id')
+        email = data.get('email')
+        try:
+            user = User.objects.get(id=user_id, email=email)
+        except User.DoesNotExist:
+            return None
+        else:
+            return user

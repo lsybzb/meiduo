@@ -69,7 +69,7 @@ class EmailView(UpdateAPIView):
     def get_object(self):
         return self.request.user
 
-
+# url(r'^emails/verification/$', views.EmailView.as_view())
 class VerifyEmailView(APIView):
     """验证邮箱"""
 
