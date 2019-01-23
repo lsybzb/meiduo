@@ -42,6 +42,7 @@
             success: true
         },
         created: function () {
+            // document.location.search 获取页面从问号 (?) 开始的 URL（查询部分）,也就是查询参数
             axios.get(this.host + '/emails/verification/' + document.location.search)
                 .then(response => {
                     this.success = true;

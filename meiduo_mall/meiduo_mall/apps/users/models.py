@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from itsdangerous import TimedJSONWebSignatureSerializer as TJWSerializer, BadData
+from django.conf import settings
+from . import constants
 
 # Create your models here.
 
@@ -19,3 +21,27 @@ class User(AbstractUser):
         verbose_name = '用户'
         # 站点中的复数形式任然显示'用户',不加s
         verbose_name_plural = verbose_name
+
+
+    def generate_verify_email_url(self):
+        """生成邮箱验证的链接"""
+        # 获取加密类对象
+        # 构造需加密的数据
+        # 加密数据并赋值保存
+        # 拼接链接
+        # 返回链接
+        serializer = TJWSerializer(settings.SECRET_KEY, expires_in=constants.VERIFY_EMAIL_TOKEN_EXPIRES)
+        data = {"user_id": self.id, "email": self.email}
+        token = serializer.dumps(data).decode()
+        verfity_url = 'http://www.meiduo.site:8080/success_verify_email.html?token=' + token
+        return verfity_url
+    @staticmethod
+    def check_email(token):
+        """验证邮箱"""
+
+        serializer = TJWSerializer(settings.SECRET_KEY, expires_in=constants.VERIFY_EMAIL_TOKEN_EXPIRES)
+
+        try:
+            data = serializer.loads(token)
+        except BadData:
+            return None
