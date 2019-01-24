@@ -63,7 +63,7 @@ class EmailView(UpdateAPIView):
     """保存邮箱"""
     # 指定序列化器
     serializer_class = serializers.EmailSerializer
-    # 指定认证类型
+    # 指定认证类
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -71,7 +71,7 @@ class EmailView(UpdateAPIView):
 
 # url(r'^emails/verification/$', views.EmailView.as_view())
 class VerifyEmailView(APIView):
-    """验证邮箱"""
+    """激活邮箱"""
 
     def get(self, request):
         # 获取查询字符串中的token
@@ -87,3 +87,6 @@ class VerifyEmailView(APIView):
             user.email_active = True
             user.save()
             return Response({"message": "OK"})
+
+
+

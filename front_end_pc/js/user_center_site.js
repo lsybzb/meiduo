@@ -30,6 +30,7 @@ var vm = new Vue({
         is_set_title: [],
         input_title: ''
     },
+    // 省市区地址查询与展示
     mounted: function(){
         axios.get(this.host + '/areas/', {
                 responseType: 'json'
@@ -38,30 +39,31 @@ var vm = new Vue({
                 this.provinces = response.data;
             })
             .catch(error => {
-                alert(error.response.data);
+                alert(error.data);
             });
 
         // 获取用户地址列表
-        axios.get(this.host + '/addresses/', {
-                headers: {
-                    'Authorization': 'JWT ' + this.token
-                },
-                responseType: 'json'
-            })
-            .then(response => {
-                this.addresses = response.data.addresses;
-                this.limit = response.data.limit;
-                this.default_address_id = response.data.default_address_id;
-            })
-            .catch(error => {
-                status = error.response.status;
-                if (status == 401 || status == 403) {
-                    location.href = 'login.html?next=/user_center_site.html';
-                } else {
-                    alert(error.response.data.detail);
-                }
-            })
+        // axios.get(this.host + '/addresses/', {
+        //         headers: {
+        //             'Authorization': 'JWT ' + this.token
+        //         },
+        //         responseType: 'json'
+        //     })
+        //     .then(response => {
+        //         this.addresses = response.data.addresses;
+        //         this.limit = response.data.limit;
+        //         this.default_address_id = response.data.default_address_id;
+        //     })
+        //     .catch(error => {
+        //         status = error.status;
+        //         if (status == 401 || status == 403) {
+        //             location.href = 'login.html?next=/user_center_site.html';
+        //         } else {
+        //             alert(error.data.detail);
+        //         }
+        //     })
     },
+    // 监听省市区列表选择的变化
     watch: {
         'form_address.province_id': function(){
             if (this.form_address.province_id) {
@@ -72,7 +74,7 @@ var vm = new Vue({
                         this.cities = response.data.subs;
                     })
                     .catch(error => {
-                        console.log(error.response.data);
+                        console.log(error.data);
                         this.cities = [];
                     });
             }
@@ -86,7 +88,7 @@ var vm = new Vue({
                         this.districts = response.data.subs;
                     })
                     .catch(error => {
-                        console.log(error.response.data);
+                        console.log(error.data);
                         this.districts = [];
                     });
             }
@@ -179,7 +181,7 @@ var vm = new Vue({
                         this.is_show_edit = false;
                     })
                     .catch(error => {
-                        console.log(error.response.data);
+                        console.log(error.data);
                     })
                 } else {
 
@@ -195,7 +197,7 @@ var vm = new Vue({
                         this.is_show_edit = false;
                     })
                     .catch(error => {
-                        alert(error.response.data.detail || error.response.data.message);
+                        alert(error.data.detail || error.data.message);
                     })
                 }
             }
@@ -213,7 +215,7 @@ var vm = new Vue({
                     this.addresses.splice(index, 1);
                 })
                 .catch(error => {
-                    console.log(error.response.data);
+                    console.log(error.data);
                 })
         },
         // 设置默认地址
@@ -228,7 +230,7 @@ var vm = new Vue({
                     this.default_address_id = this.addresses[index].id;
                 })
                 .catch(error => {
-                    console.log(error.response.data);
+                    console.log(error.data);
                 })
         },
         // 展示编辑标题
@@ -257,7 +259,7 @@ var vm = new Vue({
                         this.is_set_title = [];
                     })
                     .catch(error => {
-                        console.log(error.response.data);
+                        console.log(error.data);
                     })
             }
         },

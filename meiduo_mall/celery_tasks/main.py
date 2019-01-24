@@ -2,6 +2,7 @@ from celery import Celery
 
 # 为celery使用django配置文件进行设置
 import os
+# 如果需要用配置文件时,指定去哪里加载
 if not os.getenv('DJANGO_SETTINGS_MODULE'):
     os.environ['DJANGO_SETTINGS_MODULE'] = 'meiduo_mall.settings.dev'
 
