@@ -51,9 +51,12 @@ INSTALLED_APPS = [
     # ----------自建应用----------
     # 用户模型应用
     'users.apps.UsersConfig',
+    # QQ登陆子应用
     'oauth.apps.OauthConfig',
-    # 短信验证码
+    # 短信验证码发送子应用
     'verifications.apps.VerificationsConfig',
+    # 收货地址子应用
+    'areas.apps.AreasConfig',
 ]
 
 # 重新指定用户模型类
@@ -71,9 +74,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+# 指定总路由
 ROOT_URLCONF = 'meiduo_mall.urls'
-
+# 指定模板文件夹
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -108,21 +111,21 @@ DATABASES = {
 }
 # 配置redis服务器
 CACHES = {
-    "default": {
+    "default": {   # 指定默认的信息存储位置
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "session": {
+    "session": {   # 指定session存储位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "verify_code": {  # 存储短信码
+    "verify_code": {  # 指定存储短信码的位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/2",
         "OPTIONS": {
@@ -154,11 +157,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
-
+# 设置本地化语言为中文
 # LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'zh-hans'
 
 # TIME_ZONE = 'UTC'
+# 设置本地时区为上海,同北京时区
 TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
@@ -213,9 +217,9 @@ LOGGING = {
         },
     }
 }
-
+# REST framework配置信息
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',
+    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler', # 指定自定义处理函数,加入MySQL与Redis
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -227,15 +231,15 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:8080',
     'localhost:8080',
-    'www.meiduo.site:8080',
-    'api.meiduo.site:8000',
+    'www.meiduo.site:8080', # 前端域名别名
+    'api.meiduo.site:8000', # 后端位置
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 
 # JWT 设置
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-    "JWT_RESPONSE_PAYLOAD_HANDLER": 'users.utils.jwt_response_payload_handler',
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),   # 设置jwt过期时间
+    "JWT_RESPONSE_PAYLOAD_HANDLER": 'users.utils.jwt_response_payload_handler', # 指定自定义jwt处理函数
 }
 
 

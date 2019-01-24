@@ -4,6 +4,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as TJWSerializer, BadDa
 from django.conf import settings
 from . import constants
 
+
 # Create your models here.
 
 class User(AbstractUser):
@@ -22,7 +23,6 @@ class User(AbstractUser):
         # 站点中的复数形式任然显示'用户',不加s
         verbose_name_plural = verbose_name
 
-
     def generate_verify_email_url(self):
         """生成邮箱验证的链接"""
         # 获取加密类对象
@@ -35,6 +35,7 @@ class User(AbstractUser):
         token = serializer.dumps(data).decode()
         verfity_url = 'http://www.meiduo.site:8080/success_verify_email.html?token=' + token
         return verfity_url
+
     @staticmethod
     def check_email(token):
         """验证邮箱"""
