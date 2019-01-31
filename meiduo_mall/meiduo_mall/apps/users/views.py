@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
@@ -23,7 +24,7 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     def get_queryset(self):
         return self.request.user.addresses.filter(is_deleted=False)
 
-    # GET /addresses/
+    # GET /addresses/ 地址查询
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         user = self.request.user
@@ -37,6 +38,7 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
             'addresses': serializer.data,
         })
 
+    # POST /addresses/ 地址新增
     def create(self, request, *args, **kwargs):
         count = request.user.addresses.count()
         if count >= constants.USER_ADDRESS_COUNTS_LIMIT:
@@ -44,14 +46,41 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
 
         return super(AddressViewSet, self).create(request, *args, **kwargs)
 
-    # def update(self, request, *args, **kwargs):
-    #     pass
 
+    # delete /addresses/<pk>/ 地址删除
     def destroy(self, request, *args, **kwargs):
-        pass
 
+        address = self.get_object()
+
+        # 逻辑删除
+        address.is_deleted = True
+        address.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # put /addresses/pk/status/ 设置默认地址
+    @action(methods=["put"], detail=True)
     def status(self, request, pk=None):
-        pass
+
+        address = self.get_object()
+
+        user = request.user
+        user.default_address = address
+        user.save()
+
+        return Response({"message": "OK"}, status=status.HTTP_200_OK)
+
+    # put /addresses/pk/title/
+    # 需要请求体参数 title
+    @action(methods=["put"], detail=True)
+    def title(self, request, pk=None):
+
+        address = self.get_object()
+        serializer = serializers.AddressTitleSerializer(instance=address, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+        return Response(serializer.validated_data)
 
 
 class UsernameCountView(APIView):
