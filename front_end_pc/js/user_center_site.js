@@ -43,25 +43,25 @@ var vm = new Vue({
             });
 
         // 获取用户地址列表
-        // axios.get(this.host + '/addresses/', {
-        //         headers: {
-        //             'Authorization': 'JWT ' + this.token
-        //         },
-        //         responseType: 'json'
-        //     })
-        //     .then(response => {
-        //         this.addresses = response.data.addresses;
-        //         this.limit = response.data.limit;
-        //         this.default_address_id = response.data.default_address_id;
-        //     })
-        //     .catch(error => {
-        //         status = error.status;
-        //         if (status == 401 || status == 403) {
-        //             location.href = 'login.html?next=/user_center_site.html';
-        //         } else {
-        //             alert(error.data.detail);
-        //         }
-        //     })
+        axios.get(this.host + '/addresses/', {
+                headers: {
+                    'Authorization': 'JWT ' + this.token
+                },
+                responseType: 'json'
+            })
+            .then(response => {
+                this.addresses = response.data.addresses;
+                this.limit = response.data.limit;
+                this.default_address_id = response.data.default_address_id;
+            })
+            .catch(error => {
+                status = error.status;
+                if (status == 401 || status == 403) {
+                    location.href = 'login.html?next=/user_center_site.html';
+                } else {
+                    alert(error.data.detail);
+                }
+            })
     },
     // 监听省市区列表选择的变化
     watch: {

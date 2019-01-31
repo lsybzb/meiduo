@@ -4,12 +4,54 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
+from rest_framework.viewsets import GenericViewSet
 
+from users import constants
 from users.models import User
 from . import serializers
+
+
+"""地址管理视图集"""
+class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UserAddressSerializer
+
+    def get_queryset(self):
+        return self.request.user.addresses.filter(is_deleted=False)
+
+    # GET /addresses/
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        user = self.request.user
+        serializer = self.get_serializer(queryset, many=True)
+
+
+        return Response({
+            'user_id': user.id,
+            'default_address_id': user.default_address_id,
+            'limit': constants.USER_ADDRESS_COUNTS_LIMIT,
+            'addresses': serializer.data,
+        })
+
+    def create(self, request, *args, **kwargs):
+        count = request.user.addresses.count()
+        if count >= constants.USER_ADDRESS_COUNTS_LIMIT:
+            return Response({"message": "地址数量已达上限,请删除后再添加"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super(AddressViewSet, self).create(request, *args, **kwargs)
+
+    # def update(self, request, *args, **kwargs):
+    #     pass
+
+    def destroy(self, request, *args, **kwargs):
+        pass
+
+    def status(self, request, pk=None):
+        pass
 
 
 class UsernameCountView(APIView):
