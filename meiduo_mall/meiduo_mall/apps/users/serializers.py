@@ -15,7 +15,6 @@ class AddressTitleSerializer(serializers.ModelSerializer):
         fields = ('title',)
 
 
-
 class UserAddressSerializer(serializers.ModelSerializer):
     """
     用户地址序列化器
@@ -31,7 +30,8 @@ class UserAddressSerializer(serializers.ModelSerializer):
         model = Address
         exclude = ('user', 'is_deleted', 'create_time', 'update_time')
 
-    def validate_mobile(self, value):
+    @staticmethod
+    def validate_mobile(value):
         """
         验证手机号
         """
@@ -44,8 +44,8 @@ class UserAddressSerializer(serializers.ModelSerializer):
         保存
         """
         validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
-
+        # return super().create(validated_data)
+        return super(UserAddressSerializer, self).create(validated_data)
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -88,14 +88,16 @@ class CreateUserSerializer(serializers.ModelSerializer):
             }
         }
 
-    def validate_mobile(self, value):
+    @staticmethod
+    def validate_mobile(value):
         """2.验证手机号码格式是否正确"""
         result = re.match(r'^1[3-9]\d{9}$', value)
         if result is None:
             raise serializers.ValidationError("手机格式错误")
         return value
 
-    def validate_allow(self, value):
+    @staticmethod
+    def validate_allow(value):
         """3.验证是否同意协议"""
         if value != 'true':
             raise serializers.ValidationError("请勾选用户协议")
@@ -136,9 +138,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user.save()
 
         # 加入jwt认证机制
-        JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-        payload = JWT_PAYLOAD_HANDLER(user)
+        payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
         user.token = token
 

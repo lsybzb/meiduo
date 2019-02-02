@@ -57,6 +57,10 @@ INSTALLED_APPS = [
     'verifications.apps.VerificationsConfig',
     # 收货地址子应用
     'areas.apps.AreasConfig',
+    # 商品子应用
+    'goods.apps.GoodsConfig',
+    # 广告子应用
+    'contents.apps.ContentsConfig',
 ]
 
 # 重新指定用户模型类
