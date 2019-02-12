@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'', include('users.urls')),
     url(r'^oauth/',include('oauth.urls')), # 此处结尾不能加$
     url(r'',include('areas.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')), # 富文本编辑器
 ]

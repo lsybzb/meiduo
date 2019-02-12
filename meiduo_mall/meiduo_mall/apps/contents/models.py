@@ -14,7 +14,7 @@ class ContentCategory(BaseModel):
 
     class Meta:
         db_table = 'tb_content_category'
-        verbose_name = '广告内容类别'
+        verbose_name = '广告类别'
         verbose_name_plural = verbose_name
 
     def __str__(self):
