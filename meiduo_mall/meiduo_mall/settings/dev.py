@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'corsheaders',  #
     'ckeditor', # 富文本编辑器
     'ckeditor_uploader', # 富文本编辑器上传图片模块
+    'django_crontab', # 定时生成首页任务
 
     # ----------自建应用----------
     # 用户模型应用
@@ -303,3 +304,12 @@ CKEDITOR_CONFIGS = {
     },
 }
 CKEDITOR_UPLOAD_PATH = ''  # 上传图片保存路径，使用了FastDFS，所以此处设为''
+
+# 定时任务配置
+CRONJOBS = [
+    # 5分钟执行一次静态主页文件
+    ('*/1 * * * *', 'contents.crons.generate_static_index_html', '>> /Users/lisi/Course/code/bk_course/python_08_mdproject/meiduo/meiduo_mall/logs/crontab.log')
+]
+
+# 解决crontab中文问题
+CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'

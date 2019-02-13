@@ -18,10 +18,10 @@ from django.contrib import admin
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'', include('verifications.urls')),
-    url(r'', include('users.urls')),
-    url(r'^oauth/',include('oauth.urls')), # 此处结尾不能加$
-    url(r'',include('areas.urls')),
+    url(r'^admin/', admin.site.urls),   # 站点管理
+    url(r'^', include('verifications.urls')),    # 短信模块路由
+    url(r'^', include('users.urls')),    # 用户模块路由
+    url(r'^oauth/',include('oauth.urls')), # qq登陆模块
+    url(r'^',include('areas.urls')),     # 省市区路由
     url(r'^ckeditor/', include('ckeditor_uploader.urls')), # 富文本编辑器
 ]
