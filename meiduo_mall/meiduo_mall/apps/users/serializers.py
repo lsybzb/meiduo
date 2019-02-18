@@ -3,6 +3,8 @@ import re
 from django_redis import get_redis_connection
 from rest_framework_jwt.settings import api_settings
 
+from goods.models import SKU
+from users import constants
 from users.models import User, Address
 from celery_tasks.email.tasks import send_verify_email
 
@@ -109,7 +111,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError("两次密码不一致")
 
-        """5.判断短信验证码"""
+        # 5.判断短信验证码
         redis_conn = get_redis_connection('verify_code')
 
         real_sms_code = redis_conn.get("sms_code_%s" % attrs["mobile"])
@@ -176,3 +178,39 @@ class EmailSerializer(serializers.ModelSerializer):
         send_verify_email.delay(email, verfity_url)
 
         return instance
+
+class AddUserBrowsingHistorySerializer(serializers.Serializer):
+
+    sku_id = serializers.IntegerField(label="商品SKU编码", min_value=1)
+
+    def validate_sku_id(self, data):
+        """校验sku_id"""
+
+        # 判断sku_id是否存在
+        try:
+            SKU.objects.get(id=data)
+        except SKU.DoesNotExist:
+            raise serializers.ValidationError("该商品不存在")
+
+        # 存在则返回data
+        return data
+
+    def create(self, validated_data):
+        """保存sku_id到redis数据库中"""
+
+        # 获取用户id
+        user_id = self.context['request'].user.id
+        # 获取sku_id
+        sku_id = validated_data.get('sku_id')
+        # 建立redis数据库连接对象
+        redis_conn = get_redis_connection('history')
+        pl = redis_conn.pipeline()
+        # 将redis中存在的相同的sku_id全部删除
+        pl.lrem('history_%s' % user_id, 0, sku_id)
+        # 将记录存入redis中
+        pl.lpush('history_%s' % user_id, sku_id)
+        # 限制redis中一个用户浏览记录列表最多保存5条记录
+        pl.ltrim('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT-1)
+        pl.execute()    # 执行管道命令
+        # 返回validated_data
+        return validated_data

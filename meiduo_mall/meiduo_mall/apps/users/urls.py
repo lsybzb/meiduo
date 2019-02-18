@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^email/$', views.EmailView.as_view()),
     # 验证邮件视图
     url(r'^emails/verification/$', views.VerifyEmailView.as_view()),
+    url(r'^browse_histories/$', views.UserBrowsingHistoryView.as_view()),
 ]
 
 router = routers.DefaultRouter()

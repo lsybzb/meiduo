@@ -9,15 +9,18 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIVie
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
+from django_redis import get_redis_connection
 
+from goods.models import SKU
+from goods.serializers import SKUSerializer
 from users import constants
 from users.models import User
+from users.serializers import AddUserBrowsingHistorySerializer
 from . import serializers
 
 
-"""地址管理视图集"""
 class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
-
+    """地址管理视图集"""
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserAddressSerializer
 
@@ -29,7 +32,6 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
         queryset = self.get_queryset()
         user = self.request.user
         serializer = self.get_serializer(queryset, many=True)
-
 
         return Response({
             'user_id': user.id,
@@ -46,10 +48,8 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
 
         return super(AddressViewSet, self).create(request, *args, **kwargs)
 
-
     # delete /addresses/<pk>/ 地址删除
     def destroy(self, request, *args, **kwargs):
-
         address = self.get_object()
 
         # 逻辑删除
@@ -61,7 +61,6 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     # put /addresses/pk/status/ 设置默认地址
     @action(methods=["put"], detail=True)
     def status(self, request, pk=None):
-
         address = self.get_object()
 
         user = request.user
@@ -74,7 +73,6 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     # 需要请求体参数 title
     @action(methods=["put"], detail=True)
     def title(self, request, pk=None):
-
         address = self.get_object()
         serializer = serializers.AddressTitleSerializer(instance=address, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -116,10 +114,10 @@ class CreateUserView(CreateAPIView):
     """创建用户"""
     serializer_class = serializers.CreateUserSerializer
 
+
 # url(r'^user/$', views.UserDetailView.as_view())
 class UserDetailView(RetrieveAPIView):
     """用户中心视图"""
-
 
     # 指定序列化器
     serializer_class = serializers.UserDetailSerializer
@@ -128,6 +126,7 @@ class UserDetailView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
 
 # url(r'^email/$', views.EmailView.as_view()
 class EmailView(UpdateAPIView):
@@ -139,6 +138,7 @@ class EmailView(UpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
 
 # url(r'^emails/verification/$', views.EmailView.as_view())
 class VerifyEmailView(APIView):
@@ -160,4 +160,30 @@ class VerifyEmailView(APIView):
             return Response({"message": "OK"})
 
 
+# url(r'^browse_histories/$', views.UserBrowsingHistoryView.as_view()),
+class UserBrowsingHistoryView(CreateAPIView):
+    """添加商品浏览记录"""
 
+    # 执行序列化器类
+    serializer_class = AddUserBrowsingHistorySerializer
+    # 指定需要通过用户登录校验
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """获取浏览记录"""
+
+        # 1.获取用户id
+        user_id = request.user.id
+        # 2.建立redis连接
+        redis_conn = get_redis_connection('history')
+        # 3.获取sku_id列表
+        history = redis_conn.lrange('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT-1)
+        # 4.通过sku_id列表获取到所有对应的sku对象,放入列表中
+        skus = []
+        for sku_id in history:
+            sku = SKU.objects.get(id=sku_id)
+            skus.append(sku)
+        # 5.序列化列表
+        skus_dict = SKUSerializer(skus, many=True)
+        # 6.返回序列化后的数据
+        return Response(skus_dict.data)
