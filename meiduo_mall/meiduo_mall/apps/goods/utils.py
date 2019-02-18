@@ -1,4 +1,5 @@
 from collections import OrderedDict
+
 from .models import GoodsChannel
 
 
@@ -29,7 +30,8 @@ def get_categories():
         # 4.获取频道对象的组号
         group_id = channel.group_id
         # 5.将组号与对应的1级分类及其子类放入字典中
-        categories[group_id] = {'channels': [], 'sub_cats': []}
+        if group_id not in categories:
+            categories[group_id] = {'channels': [], 'sub_cats': []}
 
         # 获取1级分类的对象
         cat1 = channel.category
@@ -48,7 +50,7 @@ def get_categories():
             # 获取所有3级分类的对象
             for cat3 in cat2.goodscategory_set.all():
                 # 将3级分类添加到2级分类的sub_cats属性列表中
-                cat2.sub_cats.append(cat3) # 直接添加对象,序列化输出后会转为json字典
+                cat2.sub_cats.append(cat3)  # 直接添加对象,序列化输出后会转为json字典
             categories[group_id]['sub_cats'].append(cat2)
 
         # 8.返回包含所有分类信息的字典
