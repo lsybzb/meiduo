@@ -65,17 +65,18 @@ var vm = new Vue({
     mounted: function(){
         this.cat = this.get_query_string('cat');
         this.get_skus();
-        axios.get(this.host+'/categories/'+this.cat+'/', {
-                responseType:'json'
-            })
-            .then(response => {
-                this.cat1 = response.data.cat1;
-                this.cat2 = response.data.cat2;
-                this.cat3 = response.data.cat3;
-            })
-            .catch(error => {
-                console.log(error.response.data)
-            });
+        // 面包屑导航
+        // axios.get(this.host+'/categories/'+this.cat+'/', {
+        //         responseType:'json'
+        //     })
+        //     .then(response => {
+        //         this.cat1 = response.data.cat1;
+        //         this.cat2 = response.data.cat2;
+        //         this.cat3 = response.data.cat3;
+        //     })
+        //     .catch(error => {
+        //         console.log(error.response.data)
+        //     });
         // this.get_cart();
         // this.get_hot_goods();
     },
