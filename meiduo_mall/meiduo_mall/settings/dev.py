@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     'goods.apps.GoodsConfig',
     # 广告子应用
     'contents.apps.ContentsConfig',
+    # 购物车
+    'carts.apps.CartsConfig',
 ]
 
 # 重新指定用户模型类
@@ -142,14 +144,14 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "areas": {   # 指定默认的信息存储位置
+    "history": {   # 用户浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "history": {   # 指定默认的信息存储位置
+    "cart": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/4",
         "OPTIONS": {
@@ -293,7 +295,7 @@ REST_FRAMEWORK_EXTENSIONS = {
     # 缓存时间
     'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60 * 60,
     # 缓存存储
-    'DEFAULT_USE_CACHE': 'areas',
+    'DEFAULT_USE_CACHE': 'default',
 }
 
 # django文件存储

@@ -1,0 +1,30 @@
+
+pickle.dumps() 将python数据序列化为bytes类型
+pickle.loads() 将bytes类型数据反序列化为python的数据类型
+
+
+base64.b64encode() 将bytes类型数据进行base64编码，返回编码后的bytes类型
+base64.b64deocde() 将base64编码的bytes类型进行解码，返回解码后的bytes类型
+
+
+cookie 保存的购物车数据的json格式字符串
+{
+    sku_id: {
+        "count": xxx,  // 数量
+        "selected": True  // 是否勾选
+    },
+    sku_id: {
+        "count": xxx,
+        "selected": False
+    },
+    ...
+
+
+请求参数
+	哈希格式
+		sku_id
+		count
+	集合格式
+		selected
+
+前端请求都需携带请求头Authorization
