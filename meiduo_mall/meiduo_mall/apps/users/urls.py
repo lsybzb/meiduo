@@ -11,8 +11,9 @@ urlpatterns = [
     url(r'^mobiles/(?P<mobile>1[3-9]\d{9})/count/$', views.MobileCountView.as_view()),
     # 新建用户
     url(r'^users/$', views.CreateUserView.as_view()),
-    # 自动签发jwt令牌路由
-    url(r'^authorizations/$', obtain_jwt_token),
+    # 登陆验证
+    # url(r'^authorizations/$', obtain_jwt_token),
+    url(r'^authorizations/$', views.UserAuthorizeView.as_view()),
     # 用户个人中心
     url(r'^user/$', views.UserDetailView.as_view()),
     # 发送邮件视图

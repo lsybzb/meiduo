@@ -50,8 +50,13 @@ class QQAuthUserSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+
+
         # 5.用户不存在
         user = validated_data.get('user')
+
+        self.context['view'].user = user
+
         if not user:
             # 6.创建用户,通过创建类对象的方式,只需对数据库进行1次写入
             user = User(

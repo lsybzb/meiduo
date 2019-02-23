@@ -9,6 +9,7 @@ import logging
 
 from rest_framework_jwt.settings import api_settings
 
+from carts.utils import merge_cart_cookie_to_redis
 from oauth.models import OAuthQQUser
 from .serializers import QQAuthUserSerializer
 from .utils import generate_save_user_token
@@ -48,7 +49,6 @@ class QQAuthUserView(GenericAPIView):
     """
     serializer_class = QQAuthUserSerializer
 
-    # TODO:前端应向后端传送state值,后端则通过qq服务器返回的值与收到的值进行校验
     def get(self, request):
         """获取Authorization Code"""
 
@@ -86,14 +86,17 @@ class QQAuthUserView(GenericAPIView):
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
             # 8.构造返回数据
-            data = {
+            response = Response({
                 "token": token,
                 "user_id": user.id,
                 "username": user.username
-            }
-            return Response(data)
+            })
 
-    def post(self, request):
+            # 合并购物车
+            response = merge_cart_cookie_to_redis(request, user, response)
+            return response
+
+    def post(self, request, *args, **kwargs):
         """
         1.提取前端传来的参数
         2.获取序列化器对象,传入需要反序列化的参数
@@ -102,12 +105,8 @@ class QQAuthUserView(GenericAPIView):
         5.生成jwt令牌
         6.构造响应对象并返回
         """
-        # 1.提取前端传来的参数
-        # 2.获取序列化器对象,传入需要反序列化的参数
         serializer = QQAuthUserSerializer(data=request.data)
-        # 3.开启校验
         serializer.is_valid(raise_exception=True)
-        # 4.保存校验结果,返回的是保存好的user对象
         user = serializer.save()
 
         # 5.生成jwt令牌
@@ -118,8 +117,12 @@ class QQAuthUserView(GenericAPIView):
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
 
-        return Response({
-            "token": token,
-            "user_id": user.id,
-            "username": user.username,
+        response = Response({
+            'token': token,
+            'username': user.username,
+            'user_id': user.id
         })
+        # 做cookie购物车合并到redis操作
+        merge_cart_cookie_to_redis(request, user, response)
+
+        return response
