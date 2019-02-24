@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'carts.apps.CartsConfig',
     # 订单
     'orders.apps.OrdersConfig',
+    # 支付宝支付
+    'payment.apps.PaymentConfig',
 ]
 
 # 重新指定用户模型类
@@ -325,3 +327,7 @@ CRONJOBS = [
 
 # 解决crontab中文问题
 CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+ALIPAY_APPID = "2016092200574009"
+ALIPAY_URL = "https://openapi.alipaydev.com/gateway.do"
+ALIPAY_DEBUG = True

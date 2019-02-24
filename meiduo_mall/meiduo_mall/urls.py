@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^', include('goods.urls')),   # 商品
     url(r'^', include('carts.urls')),   # 购物车
     url(r'^', include('orders.urls')),  # 订单
+    url(r'^', include('payment.urls')), # 支付宝支付
 ]
