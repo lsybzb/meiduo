@@ -3,10 +3,14 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView, GenericAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from orders.models import OrderInfo
 from .models import SKU, GoodsCategory
-from .serializers import SKUSerializer
+from .serializers import SKUSerializer, OrdersInfoSerializer
 
 
 # class CategoryView(GenericAPIView):
@@ -37,6 +41,39 @@ from .serializers import SKUSerializer
 #             ret['cat1'] = ChannelSerializer(category.parent.goodschannel_set.all()[0]).data
 #
 #         return Response(ret)
+
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 1   # 第几页
+    page_size_query_param = 'page_size'
+    max_page_size = 5
+
+class OderList(GenericAPIView):
+
+    permission_classes = [IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
+
+    def get(self, request):
+        """获取"""
+
+        # 获取用户对象
+        user = request.user
+
+        queryset = OrderInfo.objects.filter(user=user).order_by('-create_time')
+
+        count = queryset.count()
+
+        serializer = OrdersInfoSerializer(instance=queryset, many=True)
+
+        data = {
+            "results": serializer.data,
+            "count": count
+        }
+        # print(data)
+        return Response(data)
+
+
+
+
 
 
 class SKUListView(ListAPIView):
