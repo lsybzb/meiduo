@@ -96,7 +96,6 @@ var vm = new Vue({
                 })
                 .then(response => {
                     this.count = response.data.count;
-                    // alert(this.count);
                     this.orders = response.data.results;
                     for(var i=0; i<this.orders.length; i++){
                         for(var j=0; j<this.orders[i].skus.length; j++){

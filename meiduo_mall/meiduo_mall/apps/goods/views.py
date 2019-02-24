@@ -42,38 +42,42 @@ from .serializers import SKUSerializer, OrdersInfoSerializer
 #
 #         return Response(ret)
 
-class LargeResultsSetPagination(PageNumberPagination):
-    page_size = 1   # 第几页
+class OrderListPagination(PageNumberPagination):
+    page_size = 2  # 每页数量
     page_size_query_param = 'page_size'
     max_page_size = 5
 
-class OderList(GenericAPIView):
+class OderList(ListAPIView):
+    """
+    1.通过重写GenericAPIView中的get_queryset 通过当前登录的用户获取该用户的订单查询集
+    2.通过重写ListModelMixin 的list方法,重新构成字典并加入订单总数量,再返回至前端
+    """
 
     permission_classes = [IsAuthenticated]
-    pagination_class = LargeResultsSetPagination
+    pagination_class = OrderListPagination
+    serializer_class = OrdersInfoSerializer
 
-    def get(self, request):
-        """获取"""
+    def get_queryset(self):
+        user = self.request.user
 
-        # 获取用户对象
-        user = request.user
+        return OrderInfo.objects.filter(user=user).order_by('-create_time')
 
-        queryset = OrderInfo.objects.filter(user=user).order_by('-create_time')
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
 
         count = queryset.count()
-
-        serializer = OrdersInfoSerializer(instance=queryset, many=True)
-
         data = {
             "results": serializer.data,
             "count": count
         }
-        # print(data)
         return Response(data)
-
-
-
-
 
 
 class SKUListView(ListAPIView):
@@ -82,7 +86,7 @@ class SKUListView(ListAPIView):
     # 指定序列化器
     serializer_class = SKUSerializer
 
-    # 指定过滤后端为排序?
+    # 指定过滤后端为排序
     filter_backends = [OrderingFilter]
 
     # 指定排序字段
