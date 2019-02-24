@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'contents.apps.ContentsConfig',
     # 购物车
     'carts.apps.CartsConfig',
+    # 订单
+    'orders.apps.OrdersConfig',
 ]
 
 # 重新指定用户模型类
