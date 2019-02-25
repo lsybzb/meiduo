@@ -127,20 +127,20 @@ var vm = new Vue({
                 })
         },
         // 获取热销商品数据
-        get_hot_goods: function(){
-            axios.get(this.host+'/categories/'+this.cat+'/hotskus/', {
-                    responseType: 'json'
-                })
-                .then(response => {
-                    this.hots = response.data;
-                    for(var i=0; i<this.hots.length; i++){
-                        this.hots[i].url = '/goods/' + this.hots[i].id + '.html';
-                    }
-                })
-                .catch(error => {
-                    console.log(error.response.data);
-                })
-        },
+        // get_hot_goods: function(){
+        //     axios.get(this.host+'/categories/'+this.cat+'/hotskus/', {
+        //             responseType: 'json'
+        //         })
+        //         .then(response => {
+        //             this.hots = response.data;
+        //             for(var i=0; i<this.hots.length; i++){
+        //                 this.hots[i].url = '/goods/' + this.hots[i].id + '.html';
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.log(error.response.data);
+        //         })
+        // },
         // 获取商品评价信息
         get_comments: function(){
             axios.get(this.host+'/skus/'+this.sku_id+'/comments/', {
