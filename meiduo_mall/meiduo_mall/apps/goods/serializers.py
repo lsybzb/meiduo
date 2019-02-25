@@ -10,6 +10,23 @@ from . import models
 # class CategorySerializer(serializers.ModelSerializer):
 #     pass
 
+
+class SKUCommentSerializer(serializers.ModelSerializer):
+    """
+    商品详情页评论展示序列化器
+    id
+    comment
+    score
+
+    username
+    """
+    username = serializers.CharField(label='评论用户名', read_only=True)
+
+    class Meta:
+        model = OrderGoods
+        fields = ['id', 'comment', 'score', 'username']
+
+
 class SKUSerializer(serializers.ModelSerializer):
     """商品列表界面序列化器"""
 

@@ -8,9 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from orders.models import OrderInfo
+from orders.models import OrderInfo, OrderGoods
+from users.models import User
 from .models import SKU, GoodsCategory
-from .serializers import SKUSerializer, OrdersInfoSerializer
+from .serializers import SKUSerializer, OrdersInfoSerializer, SKUCommentSerializer
 
 
 # class CategoryView(GenericAPIView):
@@ -42,10 +43,35 @@ from .serializers import SKUSerializer, OrdersInfoSerializer
 #
 #         return Response(ret)
 
+class SKUCommentView(ListAPIView):
+    """商品详情页评论展示"""
+
+    serializer_class = SKUCommentSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        sku_id = self.kwargs.get('sku_id')
+        # print("sku_id", sku_id)
+
+        querysets = OrderGoods.objects.filter(sku_id=sku_id, is_commented=1).all()
+
+        for queryset in querysets:
+            order_id = queryset.order_id
+            # print("order_id", order_id)
+
+            user_id = OrderInfo.objects.get(order_id=order_id).user_id
+            # print("user_id", user_id)
+            username = User.objects.get(id=user_id)
+            # print("username", username)
+            queryset.username = username
+        return querysets
+
+
 class OrderListPagination(PageNumberPagination):
     page_size = 2  # 每页数量
     page_size_query_param = 'page_size'
     max_page_size = 5
+
 
 class OderList(ListAPIView):
     """
