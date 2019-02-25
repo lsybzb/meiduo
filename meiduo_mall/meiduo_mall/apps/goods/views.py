@@ -59,7 +59,6 @@ class OderList(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-
         return OrderInfo.objects.filter(user=user).order_by('-create_time')
 
     def list(self, request, *args, **kwargs):
