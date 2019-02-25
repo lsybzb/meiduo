@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -7,15 +8,46 @@ from random import randint
 from django_redis import get_redis_connection
 import logging
 
-from meiduo_mall.libs.yuntongxun.sms import CCP
+
+from rest_framework.views import APIView
+
+from meiduo_mall.celery_tasks.email import tasks as sms_tasks
+from meiduo_mall.meiduo_mall.utils.captcha.captcha import captcha
 from . import constants
-from celery_tasks.sms import tasks as sms_tasks
+
 
 # 日志生成器
 logger = logging.getLogger('django')
 
 
 # Create your views here.
+
+
+class ImageCodeView(APIView):
+    """发送图片验证码"""
+
+    def get(self, request, image_code_id):
+        # 创建连接到redis的对象
+        redis_conn = get_redis_connection('verify_codes')
+
+        if not image_code_id:
+            logger.error("参数不足")
+            return Response({'message': '微博服务器异常'}, status=status.HTTP_404_NOT_FOUND)
+        image_name, real_image_code, image_data = captcha.generate_captcha()
+        # 将code_id作为key将验证码图片的真实值保存到redis数据库,并设置有效时长5分钟
+        try:
+            redis_conn.setex("CODEID_%s" % image_code_id, 300, real_image_code)
+            # print(real_image_code)
+        except Exception as error:
+            logger.info(error)
+            return Response({'message': '验证失败'}, status=status.HTTP_400_BAD_REQUEST)
+        # 返回验证码图片数据
+        resp = HttpResponse(image_data)
+        resp._content_type = 'image/jpg'
+
+        return resp
+
+
 
 # /sms_codes/(?P<mobile>1[3-9]\d{9})/
 class SMSCodeView(GenericAPIView):
@@ -38,7 +70,12 @@ class SMSCodeView(GenericAPIView):
 
         # 1.创建redis连接
         redis_conn = get_redis_connection('verify_code')
-
+        # 图片验证码验证
+        image_code = request.query_params.get('text')
+        image_code_id = request.query_params.get('image_code_id')
+        real_image_code = redis_conn.get("CODEID_%s" % image_code_id)
+        if real_image_code.decode() != image_code:
+            return Response({'message':'图片验证错误'},status=status.HTTP_400_BAD_REQUEST)
         # 2.检查是否60秒内已发送过验证码,
         send_flag = redis_conn.get('sms_flag_%s' % mobile)
 

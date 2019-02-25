@@ -338,3 +338,8 @@ CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
 ALIPAY_APPID = "2016092200574009"
 ALIPAY_URL = "https://openapi.alipaydev.com/gateway.do"
 ALIPAY_DEBUG = True
+
+# 新浪登录参数配置
+WEIBO_APP_ID = '3305669385'
+WEIBO_KEY = '74c7bea69d5fc64f5c3b80c802325276'
+WEIBO_CALLBACK_URI = 'http://www.meiduo.site:8080/sina_callback.html'
