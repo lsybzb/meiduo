@@ -38,7 +38,7 @@ urlpatterns = [
     url(r"^users/(?P<user_id>\d.*)/password/$", views.ResetPasswordView.as_view()),
 
     # 重置密码
-    url(r'^users/\d+/password/$', views.ResetPasswords.as_view()),
+    url(r'^user/\d+/password/$', views.ResetPasswords.as_view()),
 
 ]
 

@@ -44,7 +44,7 @@ var vm = new Vue({
                 return;
             } 
             if (vm.user_id && vm.token) {
-                axios.put(this.host + '/users/'+vm.user_id+'/password/',
+                axios.put(this.host + '/user/'+vm.user_id+'/password/',
                         {
                             old_password: vm.old_pwd,
                             password: vm.new_pwd,
@@ -61,10 +61,11 @@ var vm = new Vue({
                         alert('保存成功');
                     })
                     .catch(function(error){
-                        if (error.response.status === 403) {
-                            location = '/index.html?next=/user_center_pass.html';
+                        if (error.status === 403) {
+                            alert("403错误")
+                            // location = '/index.html?next=/user_center_pass.html';
                         } else {
-                            alert(error.response.data.message);
+                            alert(error.data.message);
                         }
                     })
             } else {
