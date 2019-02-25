@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
-from meiduo_mall.meiduo_mall.apps.oauth.models import OAuthQQUser, SinaAuthUser
-from meiduo_mall.meiduo_mall.apps.users.models import User
+# from meiduo_mall.meiduo_mall.apps.oauth.models import OAuthQQUser, SinaAuthUser
+# from meiduo_mall.meiduo_mall.apps.users.models import User
+from oauth.models import OAuthQQUser, SinaAuthUser
+from users.models import User
 from .utils import check_save_user_token
 from itsdangerous import BadData
 from rest_framework.response import Response
@@ -91,10 +93,10 @@ class SinaAuthUserSerializer(serializers.Serializer):
         # 将解密后的openid保存到反序列化的大字典中
         attrs['access_token'] = openid
         # 验证短信验证码
-        redis_conn = get_redis_connection('verify_codes')
+        redis_conn = get_redis_connection('verify_code')
         # 获取当前用户手机号码
         mobile = attrs.get('mobile')
-        real_sms_code = redis_conn.get('sms_%s' % mobile)
+        real_sms_code = redis_conn.get('sms_code_%s' % mobile)
         # 获取前端传来的验证码
         sms_code = attrs.get('sms_code')
         if real_sms_code.decode() != sms_code:    # 从redis中取出的验证码为bytes

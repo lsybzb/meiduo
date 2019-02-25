@@ -1,7 +1,8 @@
 from django.db import models
 from meiduo_mall.utils.models import BaseModel
 
-from meiduo_mall.meiduo_mall.apps.users.models import User
+# from meiduo_mall.meiduo_mall.apps.users.models import User
+from users.models import User
 
 
 class OAuthQQUser(BaseModel):

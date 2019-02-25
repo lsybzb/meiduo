@@ -22,9 +22,8 @@ urlpatterns = [
     url(r'^emails/verification/$', views.VerifyEmailView.as_view()),
     url(r'^browse_histories/$', views.UserBrowsingHistoryView.as_view()),
 
-
     # 图片验证码
-    url(r'^image_codes/(?P<image_code_id>[\w-]+)/$', views.ImageCodeView.as_view()),
+    url(r'^image_code/(?P<image_code_id>[\w-]+)/$', views.ImageCodeView.as_view()),
 
     # 输入账户名
     url(r'^accounts/(?P<username>\w{5,20})/sms/token/', views.InputAccountView.as_view()),

@@ -26,7 +26,7 @@ from users.serializers import AddUserBrowsingHistorySerializer
 from . import serializers
 
 # 获取图片验证码的
-from apps.verifications import constants
+# from meiduo_mall.apps.verifications import constants
 from meiduo_mall.utils.captcha.captcha import captcha
 from celery_tasks.sms.tasks import send_sms_code
 
@@ -188,6 +188,7 @@ class ImageCodeView(APIView):
         # image_code_id = request.GET.get('image_code_id')
         # 2. 生成验证码
         name, text, image = captcha.generate_captcha()
+        print('captcha之后', text)
         try:
             # 保存当前生成的图片验证码内容
             redis_coon = get_redis_connection('image_codes')

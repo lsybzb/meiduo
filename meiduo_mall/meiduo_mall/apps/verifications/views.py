@@ -11,8 +11,11 @@ import logging
 
 from rest_framework.views import APIView
 
-from meiduo_mall.celery_tasks.email import tasks as sms_tasks
-from meiduo_mall.meiduo_mall.utils.captcha.captcha import captcha
+# from meiduo_mall.celery_tasks.email import tasks as sms_tasks
+from celery_tasks.sms import tasks as sms_tasks
+# from meiduo_mall.meiduo_mall.utils.captcha.captcha import captcha
+# from utils.captcha.captcha import captcha
+from meiduo_mall.utils.captcha.captcha import captcha
 from . import constants
 
 
@@ -28,7 +31,7 @@ class ImageCodeView(APIView):
 
     def get(self, request, image_code_id):
         # 创建连接到redis的对象
-        redis_conn = get_redis_connection('verify_codes')
+        redis_conn = get_redis_connection('verify_code')
 
         if not image_code_id:
             logger.error("参数不足")
@@ -74,8 +77,14 @@ class SMSCodeView(GenericAPIView):
         image_code = request.query_params.get('text')
         image_code_id = request.query_params.get('image_code_id')
         real_image_code = redis_conn.get("CODEID_%s" % image_code_id)
-        if real_image_code.decode() != image_code:
-            return Response({'message':'图片验证错误'},status=status.HTTP_400_BAD_REQUEST)
+
+        if real_image_code and real_image_code.decode() != image_code:
+            return Response({'message': '图片验证错误'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            pass
+
+        # if real_image_code.decode() != image_code:
+        #     return Response({'message':'图片验证错误'},status=status.HTTP_400_BAD_REQUEST)
         # 2.检查是否60秒内已发送过验证码,
         send_flag = redis_conn.get('sms_flag_%s' % mobile)
 

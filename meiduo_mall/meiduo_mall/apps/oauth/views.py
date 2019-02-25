@@ -8,10 +8,13 @@ from django.conf import settings
 import logging
 
 from rest_framework_jwt.settings import api_settings
-
-from meiduo_mall.meiduo_mall.apps.carts.utils import merge_cart_cookie_to_redis
-from meiduo_mall.meiduo_mall.apps.oauth.models import SinaAuthUser, OAuthQQUser
-from meiduo_mall.meiduo_mall.apps.oauth.sina import OAuth_WEIBO
+from itsdangerous import TimedJSONWebSignatureSerializer as TJS
+# from meiduo_mall.meiduo_mall.apps.carts.utils import merge_cart_cookie_to_redis
+from carts.utils import merge_cart_cookie_to_redis
+# from meiduo_mall.meiduo_mall.apps.oauth.models import SinaAuthUser, OAuthQQUser
+# from meiduo_mall.meiduo_mall.apps.oauth.sina import OAuth_WEIBO
+from oauth.models import OAuthQQUser, SinaAuthUser
+from oauth.sina import OAuth_WEIBO
 from .serializers import QQAuthUserSerializer, SinaAuthUserSerializer
 from .utils import generate_save_user_token
 
