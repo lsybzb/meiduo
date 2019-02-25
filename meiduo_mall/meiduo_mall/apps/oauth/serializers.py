@@ -86,10 +86,10 @@ class SinaAuthUserSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         # 验证短信验证码
-        redis_conn = get_redis_connection('verify_codes')
+        redis_conn = get_redis_connection('verify_code')
         # 获取当前用户手机号码
         mobile = attrs.get('mobile')
-        real_sms_code = redis_conn.get('sms_%s' % mobile)
+        real_sms_code = redis_conn.get('sms_code_%s' % mobile)
         # 获取前端传来的验证码
         sms_code = attrs.get('sms_code')
         if real_sms_code.decode() != sms_code:  # 从redis中取出的验证码为bytes
@@ -97,14 +97,17 @@ class SinaAuthUserSerializer(serializers.Serializer):
 
         user = None
         try:
-            # 判断手机号码是否为旧用户
+            # 判断手机号码是否为新用户
             user = User.objects.get(mobile=mobile)
         except User.DoesNotExist:
-            # 如果出现异常说明是旧用户
+            # 如果出现异常说明是新用户
+            pass
+        else:
+            # 无异常表明此手机号为已注册用户
             if not user.check_password(attrs.get('password')):
                 raise serializers.ValidationError('已存在用户,但密码不正确')
-        attrs["user"] = user
-
+            else:
+                attrs['user'] = user
         return attrs
 
     def create(self, validated_data):
