@@ -47,6 +47,7 @@ var vm = new Vue({
                     this.access_token = response.data.access_token;
                     this.generate_image_code();
                     this.is_show_waiting = false;
+
                 }
             })
             .catch(error => {
@@ -93,6 +94,7 @@ var vm = new Vue({
             } else {
                 this.error_password = false;
             }
+
         },
         check_phone: function (){
             var re = /^1[345789]\d{9}$/;
@@ -194,8 +196,8 @@ var vm = new Vue({
                         location.href = '/';
                     })
                     .catch(error => {
-                        if (error.status == 400) {
-                            this.error_sms_code_message = error.data.message;
+                        if (error.response.status == 400) {
+                            this.error_sms_code_message = "短信验证码错误";
                             this.error_sms_code = true;
                         } else {
                             console.log(error.data);

@@ -133,11 +133,12 @@ class QQAuthUserView(GenericAPIView):
 
 class WeiboAuthUserView(APIView):
     """扫码成功后回调处理"""
-    def get(self,request):
+
+    def get(self, request):
         # 获取查询参数中的code参数
         code = request.query_params.get('code')
         if not code:
-            return Response({'message':'缺少code'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': '缺少code'}, status=status.HTTP_400_BAD_REQUEST)
         next = "/"
         # 创建微博登录工具对象
         oauthweibo = OAuth_WEIBO(client_id=settings.WEIBO_APP_ID,
@@ -147,25 +148,26 @@ class WeiboAuthUserView(APIView):
                                  )
         # 通过code向sina服务器请求获取access_token
         try:
-            weibo_token = oauthweibo.get_access_token(code=code)
-        except Exception as e:
-            return Response({"message":"获取access_token失败"}, status=status.HTTP_400_BAD_REQUEST)
+            weibo_token = oauthweibo.get_access_token(code)
+        except Exception as error:
+            logger.info(error)
+            return Response({"message": "微博服务器异常"}, status=status.HTTP_400_BAD_REQUEST)
         # 判断是否绑定过美多账号
         try:
-            weibo_user = SinaAuthUser.objects.get(weibo_token=weibo_token)
+            weibo_user = SinaAuthUser.objects.get(access_token=weibo_token)
         except:
             # 没绑定过
-            tjs = TJS(settings.SECRET_KEY, 300)
-            # weibo_token = tjs.dumps({'access_token':weibo_token}).decode()
-            weibo_token=generate_save_user_token(weibo_token)
-            return Response({'access_token':weibo_token})
+            # tjs = TJS(settings.SECRET_KEY, 300)
+            # weibo_token = tjs.dumps({'access_token': weibo_token}).decode()
+            # weibo_token = generate_save_user_token(weibo_token)
+            return Response({'access_token': weibo_token})
 
         else:
             # 绑定过
-            user = weibo_user.user
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
+            user = weibo_user.user
             payload = jwt_payload_handler(user)  # 生成载荷部分
             token = jwt_encode_handler(payload)  # 生成token
 
@@ -179,7 +181,7 @@ class WeiboAuthUserView(APIView):
 
         return response
 
-    def post(self,request):
+    def post(self, request):
         # 创建序列化器对象,进行反序列化
         serializer = SinaAuthUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -198,16 +200,16 @@ class WeiboAuthUserView(APIView):
         token = jwt_encode_handler(payload)
 
         return Response({
-            'token':token,
-            'username':user.username,
-            'user_id':user.id
+            'token': token,
+            'username': user.username,
+            'user_id': user.id
         })
 
 
 class SinaAuthURLView(APIView):
     """生成新浪扫码url"""
 
-    def get(self,request):
+    def get(self, request):
         # 获取next参数
         next = request.query_params.get('next')
         # next 不存在则返回首页
@@ -216,12 +218,12 @@ class SinaAuthURLView(APIView):
 
         # 创建微博登录sdk对象
         oauthweibo = OAuth_WEIBO(client_id=settings.WEIBO_APP_ID, client_key=settings.WEIBO_KEY,
-                           redirect_uri =settings.WEIBO_CALLBACK_URI,state=next)
+                                 redirect_uri=settings.WEIBO_CALLBACK_URI, state=next)
 
         # 获取二维码链接
         login_url = oauthweibo.get_auth_url()
 
         # 返回二维码给前端
-        return Response({'login_url':login_url})
+        return Response({'login_url': login_url})
 
 

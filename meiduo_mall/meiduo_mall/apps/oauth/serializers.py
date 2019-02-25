@@ -80,41 +80,31 @@ class SinaAuthUserSerializer(serializers.Serializer):
     """ 绑定用户的序列化器"""
 
     access_token = serializers.CharField(label='操作凭证')
-    mobile = serializers.RegexField(label='手机号',regex=r'^1[3-9]\d{9}$')
-    password = serializers.CharField(label='密码',max_length=20)
+    mobile = serializers.RegexField(label='手机号', regex=r'^1[3-9]\d{9}$')
+    password = serializers.CharField(label='密码', max_length=20)
     sms_code = serializers.CharField(label='短信验证码')
 
     def validate(self, attrs):
-        # 获取加密的openid
-        access_token = attrs.get('access_token')
-        openid = check_save_user_token(access_token)
-        if not openid:
-            raise serializers.ValidationError('openid无效')
-        # 将解密后的openid保存到反序列化的大字典中
-        attrs['access_token'] = openid
         # 验证短信验证码
-        redis_conn = get_redis_connection('verify_code')
+        redis_conn = get_redis_connection('verify_codes')
         # 获取当前用户手机号码
         mobile = attrs.get('mobile')
-        real_sms_code = redis_conn.get('sms_code_%s' % mobile)
+        real_sms_code = redis_conn.get('sms_%s' % mobile)
         # 获取前端传来的验证码
         sms_code = attrs.get('sms_code')
-        if real_sms_code.decode() != sms_code:    # 从redis中取出的验证码为bytes
+        if real_sms_code.decode() != sms_code:  # 从redis中取出的验证码为bytes
             raise serializers.ValidationError('验证码错误')
 
-
+        user = None
         try:
-            # 判断手机号码是否为新用户
+            # 判断手机号码是否为旧用户
             user = User.objects.get(mobile=mobile)
         except User.DoesNotExist:
-            # 如果出现异常说明是新用户
-            pass
-        else:
-            # 无异常表明此手机号为已注册用户
+            # 如果出现异常说明是旧用户
             if not user.check_password(attrs.get('password')):
                 raise serializers.ValidationError('已存在用户,但密码不正确')
-            else:
-                attrs['user'] = user
+        attrs["user"] = user
+
         return attrs
 
     def create(self, validated_data):
@@ -131,10 +121,10 @@ class SinaAuthUserSerializer(serializers.Serializer):
             user.set_password(validated_data.get('password'))
             user.save()
 
-        # 绑定user与openid
+        # 绑定user与access_token
         SinaAuthUser.objects.create(
-            user = user,
-            openid = validated_data.get('access_token')
+            user=user,
+            access_token=validated_data.get('access_token')
         )
 
         return user
