@@ -33,6 +33,36 @@ from celery_tasks.sms.tasks import send_sms_code
 logger = logging.getLogger('django')
 
 
+class ResetPasswords(APIView):
+    """修改密码"""
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+
+        user = self.request.user                        # 获取当前登录用户
+
+        data = request.data                             # 获取前端请求体中的数据
+
+        old_password = data.get('old_password')     # 取出数据键为old_password
+        password = data.get('password')             # 取出数据键为password
+        password2 = data.get('password2')           # 取出数据键为password2
+
+        if not all([old_password, password, password2]):
+            return Response({"message": "参数不足!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != password2:                           # 判断新密码和确认密码是否相等
+            return Response({"message": "新密码不一致!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.check_password(old_password):         # 校验数据
+
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        user.set_password(password)
+        user.save()                                 # 保存到数据库
+
+        return Response({"message": "ok"})
+
+
 class ResetPasswordView(APIView):
     # post '/users/' + this.user_id + '/password/'
     def post(self, request, user_id):
