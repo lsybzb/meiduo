@@ -20,6 +20,77 @@ from .models import OrderInfo, OrderGoods
 #         fields = ['id', 'default_image_url', 'name']
 
 
+class SaveCommentSerializer(serializers.ModelSerializer):
+    """保存评论序列化器
+
+    传入数据
+    order:			order_id	order_info & ordergoods
+    sku:			sku_id		ordergoods
+    comment: 		评论			ordergoods
+    score: 			评分			ordergoods
+    is_anonymous:	是否匿名		ordergoods
+
+    需修改数据
+    is_commented
+    """
+
+    class Meta:
+        model = OrderGoods
+        fields = ['order_id', 'sku_id', 'comment', 'score',
+                  'is_anonymous', 'is_commented']
+
+    def validate(self, data):
+        """
+        1.序列化器校验数据返回
+        :param data:
+        :return:
+        """
+
+        comment = data.get('comment')
+        score = data.get('score')
+        is_anonymous = data.get('is_anonymous', False)
+        print("comment", comment)
+        print("score", score)
+        print("is_anonymous", is_anonymous)
+        if not all([comment, score]):
+            raise serializers.ValidationError("参数不全")
+        return data
+
+    def update(self, instance, validated_data):
+        """
+        1.保存ordergoods信息,修改评论状态
+        2.通过该订单id查询计算一共有多少个商品
+        3.过滤查询并统计该订单下已经评价的id有多少个
+        4.判断2与3两个数据是否相同,
+		相同则修改order_info的订单状态
+        :param validated_data:
+        :return:
+        """
+
+        instance.comment = validated_data.get('comment')
+        instance.score = validated_data.get('score')
+        instance.is_anonymous = validated_data.get('is_anonymous')
+        instance.is_commented = True
+        instance.save()
+
+
+        order_id = instance.order_id
+        total_count = OrderGoods.objects.filter(order_id=order_id).count()
+        print("total_count", total_count)
+        commented_count = OrderGoods.objects.filter(order_id=order_id, is_commented=True).count()
+        print("commented_count", commented_count)
+
+        if (total_count !=0) and (total_count == commented_count):
+            try:
+                order_info = OrderInfo.objects.get(order_id=order_id)
+                order_info.status = 5
+                order_info.save()
+            except Exception:
+                raise serializers.ValidationError("修改订单状态并保存到数据库时失败")
+        return instance
+
+
+
 class CommentGoodsSerializer(serializers.ModelSerializer):
     """订单spu序列化器"""
 
@@ -28,6 +99,7 @@ class CommentGoodsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderGoods
         fields = ['id', 'order_id', 'sku_id', 'sku', 'price']
+
 
 class SaveOrderSerializer(serializers.ModelSerializer):
     """保存订单序列化器"""

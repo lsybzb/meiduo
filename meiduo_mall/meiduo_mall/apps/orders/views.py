@@ -3,22 +3,49 @@ from django.shortcuts import render
 
 # Create your views here.
 from django_redis import get_redis_connection
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from goods.models import SKU
 from orders.models import OrderGoods
-from orders.serializers import OrderSettlementSerializer, SaveOrderSerializer, CommentGoodsSerializer
+from orders.serializers import OrderSettlementSerializer, SaveOrderSerializer, CommentGoodsSerializer, \
+    SaveCommentSerializer
 
+
+class SaveCommentUpdateView(GenericAPIView):
+    """保存评论视图"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        print(order_id)
+        sku_id = request.data.get('sku')
+        ordergoods = OrderGoods.objects.get(order_id=order_id, sku_id=sku_id)
+        comment = request.data.get('comment')
+        score = request.data.get('score')
+        is_anonymous = request.data.get('is_anonymous', False)
+
+        comment_dict = {
+            "order_id": order_id,
+            "sku_id":sku_id,
+            "comment":comment,
+            "score":score,
+            "is_anonymous":is_anonymous
+        }
+        serializer = SaveCommentSerializer(instance=ordergoods, data=comment_dict)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+
+        return Response({"message":"ok"})
 
 class CommentListView(ListAPIView):
-
+    """商品评价界面展示"""
 
     permission_classes = [IsAuthenticated]
     pagination_class = None
-    # 指定查询集
+
     # 指定序列化器
     serializer_class = CommentGoodsSerializer
 
