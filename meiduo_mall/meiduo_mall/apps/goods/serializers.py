@@ -40,7 +40,7 @@ class OrdersInfoSerializer(serializers.ModelSerializer):
     """订单信息序列化器"""
 
     skus = OrderGoodsSerializer(many=True)
-    create_time = serializers.DateTimeField(format="%Y年%m月%d %H时%M分%S秒")
+    create_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         model = OrderInfo

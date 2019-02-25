@@ -77,7 +77,7 @@
 									<li class="col04">{{ order_sku.amount }}元</li>
 								</ul>
 							</td>
-							<td width="15%">{{ order.total_amount }}元<br>运费{{order.freight}}元</td>
+							<td width="15%">合计 {{ order.total_amount }} 元<br>运费 {{order.freight}} 元</td>
 							<td width="15%">{{ order.pay_method_name }}</td>
 							<td width="15%"><a @click="on_operate_order(index)" class="oper_btn">{{ order.status_name }}</a></td>
 						</tr>
