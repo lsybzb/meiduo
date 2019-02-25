@@ -21,6 +21,23 @@ urlpatterns = [
     # 验证邮件视图
     url(r'^emails/verification/$', views.VerifyEmailView.as_view()),
     url(r'^browse_histories/$', views.UserBrowsingHistoryView.as_view()),
+
+
+    # 图片验证码
+    url(r'^image_codes/(?P<image_code_id>[\w-]+)/$', views.ImageCodeView.as_view()),
+
+    # 输入账户名
+    url(r'^accounts/(?P<username>\w{5,20})/sms/token/', views.InputAccountView.as_view()),
+
+    # 获取短信验证码
+    url(r'^sms_codes/', views.SMSCodeView.as_view()),
+
+    # 验证用户身份
+    url(r'^accounts/(?P<mobile>\w{5,20})/password/token/', views.VerifyIdentificationView.as_view()),
+
+    # 修改密码
+    url(r"^users/(?P<user_id>\d.*)/password/$", views.ResetPasswordView.as_view()),
+
 ]
 
 router = routers.DefaultRouter()
