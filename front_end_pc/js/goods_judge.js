@@ -58,6 +58,7 @@ var vm = new Vue({
         on_stars_click: function(index, score) {
             this.skus[index].final_score = score;
         },
+        // 保存商品评论
         save_comment: function(index){
             var sku = this.skus[index];
             if (sku.comment.length < 5){
