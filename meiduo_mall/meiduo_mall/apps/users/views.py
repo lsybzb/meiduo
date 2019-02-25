@@ -1,3 +1,5 @@
+from random import randint
+
 from django.shortcuts import render
 
 # Create your views here.
@@ -11,14 +13,165 @@ from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from django_redis import get_redis_connection
 from rest_framework_jwt.views import ObtainJSONWebToken
+import logging
+from django.http import HttpResponse
+from rest_framework_jwt.settings import api_settings
 
 from carts.utils import merge_cart_cookie_to_redis
 from goods.models import SKU
 from goods.serializers import SKUSerializer
 from users import constants
-from users.models import User
+from users.models import User, Address
 from users.serializers import AddUserBrowsingHistorySerializer
 from . import serializers
+
+# 获取图片验证码的
+from apps.verifications import constants
+from meiduo.utils.captcha.captcha import captcha
+from celery_tasks.sms.tasks import send_sms_code
+
+logger = logging.getLogger('django')
+
+
+class ResetPasswordView(APIView):
+    # post '/users/' + this.user_id + '/password/'
+    def post(self, request, user_id):
+        # 1 获取参数： 两次密码
+        password = request.data.get("password")
+        password2 = request.data.get("password2")
+        if password != password2:
+            return Response({"message": "两次密码输入不一致， 请重新输入"}, status=status.HTTP_304_NOT_MODIFIED)
+        # 将密码关联到用户
+        user = User.objects.get(id=user_id)
+        user.set_password(password)  # 对密码进行为密码
+        user.save()
+
+        # 手动生成token
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER  # 加载生成载荷函数
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER  # 加载生成token函数
+
+        payload = jwt_payload_handler(user)  # 生成载荷
+        token = jwt_encode_handler(payload)  # 根据载荷生成token
+
+        return Response({"message": "OK"}, status=status.HTTP_202_ACCEPTED)
+
+
+
+class VerifyIdentificationView(APIView):
+    # GET / accounts / 13827451655 / password / token /?sms_code = 838604
+    # 查询参数的方式
+    def get(self, request, mobile):
+        """验证用户身份"""
+        # 1. 获得请求的参数：mobile， 短信验证码, 当前要修改密码的用户
+        user = User.objects.get(mobile=mobile)
+        sms_code = request.query_params.get('sms_code')
+        # 2  验证参数的正确性
+        redis_conn = get_redis_connection('verify_codes')
+        try:
+            real_sms_code = redis_conn.get('sms_%s' % mobile)
+        except Exception as e:
+            logger.error(e)
+            return Response({"message": "数据库链接异常"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        if real_sms_code:
+            if sms_code != real_sms_code.decode():
+                return Response({"message": "验证码错误"}, status=status.HTTP_304_NOT_MODIFIED)
+            else:
+                return Response({'user_id': user.id, 'access_token': mobile})
+
+
+class SMSCodeView(APIView):
+    """发送短信验证码"""
+    # GET http: // api.meiduo.site: 8000 / sms_codes /?access_token = undefined
+    def get(self, request):
+        # 0.创建redis连接对象
+        mobile = request.query_params.get('access_token')
+        redis_conn = get_redis_connection('verify_codes')
+        # 1.获取此手机号是否有发送过的标记
+        flag = redis_conn.get('send_flag_%s' % mobile)
+        # 2.如果已发送就提前响应,不执行后续代码
+        if flag:  # 如果if成立说明此手机号60秒内发过短信
+            return Response({'message': '频繁发送短信'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3.生成短信验证码
+        sms_code = '%06d' % randint(0, 999999)
+        print(sms_code)
+        logger.info(sms_code)
+        # 创建redis管道对象
+        pl = redis_conn.pipeline()
+
+        # 4.把验证码存储到redis中
+        # redis_conn.setex(key, 过期时间, value)
+        # redis_conn.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        pl.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        # 4.1 存储此手机号已发送短信标记
+        # redis_conn.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+        pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+
+        # 执行管道
+        pl.execute()
+
+        # 5.利用容联云通讯发短信
+        # CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
+        # 触发异步任务(让发短信不要阻塞主线程)
+        # send_sms_code(mobile, sms_code)
+        send_sms_code.delay(mobile, sms_code)
+        # 6.响应
+        return Response(data={'message': "ok"})
+
+
+class InputAccountView(APIView):
+
+    def get(self, request, username):
+        """输入账户名和图片验证码到下一步的表单提交"""
+        # 1  根据username 到 mysql 数据库中查询 用户是否存在
+        user = User.objects.get(username=username)
+        if not user:
+            return Response({"message": "用户不存在， 请重新输入"})
+
+        # 1. 获取请求参数
+        image_code_id = request.query_params.get("image_code_id")
+        image_code = request.query_params.get("text")
+        # print(image_code_id)
+        # 2. 根据image_code_id 到redis数据库中获取图片验证码
+        redis_conn = get_redis_connection("image_codes")
+        real_image_code = redis_conn.get('ImageCode_' + image_code_id)
+        # print(real_image_code)
+        if image_code.lower() != real_image_code.decode().lower():
+            print('错误')
+            return Response({'message': '图片验证码错误'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'username': username, "access_token": user.mobile, 'mobile': user.mobile})
+
+
+class ImageCodeView(APIView):
+    # 记得要开redis数据库 redis-server
+    # get请求， 路由：
+    # 如：GET http://api.meiduo.site:8000/image_codes/e2b35ce0-fb29-46de-b64c-ce28ab90054f/
+    def get(self, request, image_code_id):
+        """
+        获取图片验证码
+        :return:
+        """
+        # 1. 获取到当前的图片编号id
+        # image_code_id = request.GET.get('image_code_id')
+        # 2. 生成验证码
+        name, text, image = captcha.generate_captcha()
+        try:
+            # 保存当前生成的图片验证码内容
+            redis_coon = get_redis_connection('image_codes')
+            redis_coon.setex('ImageCode_' + image_code_id, 300, text)
+        except Exception as error:
+            logger.info(error)
+            return Response({'errmsg': '保存图片验证码失败'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 返回响应内容
+        resp = HttpResponse(image)
+        # 设置内容类型
+        resp.content_type = 'image/jpg'
+        return resp
+
 
 
 class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
