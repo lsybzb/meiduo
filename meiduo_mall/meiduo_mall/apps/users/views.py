@@ -27,7 +27,7 @@ from . import serializers
 
 # 获取图片验证码的
 from apps.verifications import constants
-from meiduo.utils.captcha.captcha import captcha
+from meiduo_mall.utils.captcha.captcha import captcha
 from celery_tasks.sms.tasks import send_sms_code
 
 logger = logging.getLogger('django')
@@ -57,7 +57,6 @@ class ResetPasswordView(APIView):
         return Response({"message": "OK"}, status=status.HTTP_202_ACCEPTED)
 
 
-
 class VerifyIdentificationView(APIView):
     # GET / accounts / 13827451655 / password / token /?sms_code = 838604
     # 查询参数的方式
@@ -67,7 +66,7 @@ class VerifyIdentificationView(APIView):
         user = User.objects.get(mobile=mobile)
         sms_code = request.query_params.get('sms_code')
         # 2  验证参数的正确性
-        redis_conn = get_redis_connection('verify_codes')
+        redis_conn = get_redis_connection('verify_code')
         try:
             real_sms_code = redis_conn.get('sms_%s' % mobile)
         except Exception as e:
@@ -83,11 +82,12 @@ class VerifyIdentificationView(APIView):
 
 class SMSCodeView(APIView):
     """发送短信验证码"""
+
     # GET http: // api.meiduo.site: 8000 / sms_codes /?access_token = undefined
     def get(self, request):
         # 0.创建redis连接对象
         mobile = request.query_params.get('access_token')
-        redis_conn = get_redis_connection('verify_codes')
+        redis_conn = get_redis_connection('verify_code')
         # 1.获取此手机号是否有发送过的标记
         flag = redis_conn.get('send_flag_%s' % mobile)
         # 2.如果已发送就提前响应,不执行后续代码
@@ -116,7 +116,7 @@ class SMSCodeView(APIView):
         # CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], 1)
         # 触发异步任务(让发短信不要阻塞主线程)
         # send_sms_code(mobile, sms_code)
-        send_sms_code.delay(mobile, sms_code)
+        send_sms_code.delay(mobile, sms_code, constants.SMS_CODE_REDIS_EXPIRES)
         # 6.响应
         return Response(data={'message': "ok"})
 
@@ -171,7 +171,6 @@ class ImageCodeView(APIView):
         # 设置内容类型
         resp.content_type = 'image/jpg'
         return resp
-
 
 
 class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
@@ -332,7 +331,7 @@ class UserBrowsingHistoryView(CreateAPIView):
         # 2.建立redis连接
         redis_conn = get_redis_connection('history')
         # 3.获取sku_id列表
-        history = redis_conn.lrange('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT-1)
+        history = redis_conn.lrange('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT - 1)
         # 4.通过sku_id列表获取到所有对应的sku对象,放入列表中
         skus = []
         for sku_id in history:
@@ -348,6 +347,7 @@ class UserAuthorizeView(ObtainJSONWebToken):
     """
     用户认证
     """
+
     def post(self, request, *args, **kwargs):
         # 调用父类的方法，获取drf jwt扩展默认的认证用户处理结果
         response = super().post(request, *args, **kwargs)
