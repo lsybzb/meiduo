@@ -1,17 +1,30 @@
 from decimal import Decimal
-
 from django.shortcuts import render
 
 # Create your views here.
 from django_redis import get_redis_connection
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from goods.models import SKU
-from orders.serializers import OrderSettlementSerializer, SaveOrderSerializer
+from orders.models import OrderGoods
+from orders.serializers import OrderSettlementSerializer, SaveOrderSerializer, CommentGoodsSerializer
 
+
+class CommentListView(ListAPIView):
+
+
+    permission_classes = [IsAuthenticated]
+    pagination_class = None
+    # 指定查询集
+    # 指定序列化器
+    serializer_class = CommentGoodsSerializer
+
+    def get_queryset(self):
+        order_id = self.kwargs.get('order_id')
+        return OrderGoods.objects.filter(order_id=order_id)
 
 class OrderSettlementView(APIView):
     """

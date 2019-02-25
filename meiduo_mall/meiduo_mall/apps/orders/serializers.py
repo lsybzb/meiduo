@@ -7,9 +7,27 @@ from django_redis import get_redis_connection
 from django.db import transaction
 
 from goods.models import SKU
+from goods.serializers import OrderSKUSerializer
 from meiduo_mall.utils.exceptions import logger
 from .models import OrderInfo, OrderGoods
 
+
+# class OrderSKUSerializer(serializers.ModelSerializer):
+#     """商品序列化器"""
+#
+#     class Meta:
+#         model = SKU
+#         fields = ['id', 'default_image_url', 'name']
+
+
+class CommentGoodsSerializer(serializers.ModelSerializer):
+    """订单spu序列化器"""
+
+    sku = OrderSKUSerializer()
+
+    class Meta:
+        model = OrderGoods
+        fields = ['id', 'order_id', 'sku_id', 'sku', 'price']
 
 class SaveOrderSerializer(serializers.ModelSerializer):
     """保存订单序列化器"""
