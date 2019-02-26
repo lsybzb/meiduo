@@ -126,7 +126,7 @@ class SMSCodeView(APIView):
 
         # 3.生成短信验证码
         sms_code = '%06d' % randint(0, 999999)
-        print(sms_code)
+        # print(sms_code)
         logger.info(sms_code)
         # 创建redis管道对象
         pl = redis_conn.pipeline()
@@ -169,7 +169,7 @@ class InputAccountView(APIView):
         real_image_code = redis_conn.get('ImageCode_' + image_code_id)
         # print(real_image_code)
         if image_code.lower() != real_image_code.decode().lower():
-            print('错误')
+            # print('错误')
             return Response({'message': '图片验证码错误'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'username': username, "access_token": user.mobile, 'mobile': user.mobile})
@@ -188,7 +188,7 @@ class ImageCodeView(APIView):
         # image_code_id = request.GET.get('image_code_id')
         # 2. 生成验证码
         name, text, image = captcha.generate_captcha()
-        print('captcha之后', text)
+        # print('captcha之后', text)
         try:
             # 保存当前生成的图片验证码内容
             redis_coon = get_redis_connection('image_codes')
