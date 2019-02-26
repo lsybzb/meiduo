@@ -59,6 +59,7 @@ var vm = new Vue({
                     )
                     .then(function(response){
                         alert('保存成功');
+                        location.href = "/user_center_pass.html";
                     })
                     .catch(function(error){
                         if (error.status === 403) {

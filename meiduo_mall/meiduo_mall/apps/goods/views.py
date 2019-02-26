@@ -51,23 +51,24 @@ class SKUCommentView(ListAPIView):
 
     def get_queryset(self):
         sku_id = self.kwargs.get('sku_id')
-        # print("sku_id", sku_id)
 
         querysets = OrderGoods.objects.filter(sku_id=sku_id, is_commented=1).all()
 
         for queryset in querysets:
             order_id = queryset.order_id
-            # print("order_id", order_id)
 
             user_id = OrderInfo.objects.get(order_id=order_id).user_id
-            # print("user_id", user_id)
             username = User.objects.get(id=user_id)
-            # print("username", username)
             queryset.username = username
         return querysets
 
 
 class OrderListPagination(PageNumberPagination):
+    """
+    page_size:              默认每页展示的数量
+    page_size_query_param:  指定默认的接收接收每页数量的参数名
+    max_page_size:          限制最大每页展示数量
+    """
     page_size = 2  # 每页数量
     page_size_query_param = 'page_size'
     max_page_size = 5
@@ -75,8 +76,13 @@ class OrderListPagination(PageNumberPagination):
 
 class OderList(ListAPIView):
     """
-    1.通过重写GenericAPIView中的get_queryset 通过当前登录的用户获取该用户的订单查询集
-    2.通过重写ListModelMixin 的list方法,重新构成字典并加入订单总数量,再返回至前端
+    订单列表展示
+
+    1.验证通过的用户才能进入本接口
+    2.自定义分页类,定制个性化展示需求
+    3.指定序列化器
+    4.通过重写GenericAPIView中的get_queryset 通过当前登录的用户获取该用户的订单查询集
+    5.通过重写ListModelMixin 的list方法,重新构成字典并加入订单总数量,再返回至前端
     """
 
     permission_classes = [IsAuthenticated]

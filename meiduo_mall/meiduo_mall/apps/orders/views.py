@@ -15,7 +15,10 @@ from orders.serializers import OrderSettlementSerializer, SaveOrderSerializer, C
 
 
 class SaveCommentUpdateView(GenericAPIView):
-    """保存评论视图"""
+    """
+    保存评论视图
+    """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, order_id):
@@ -37,16 +40,15 @@ class SaveCommentUpdateView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-
         return Response({"message":"ok"})
 
 class CommentListView(ListAPIView):
-    """商品评价界面展示"""
+    """
+    商品评价界面展示
+    """
 
     permission_classes = [IsAuthenticated]
     pagination_class = None
-
-    # 指定序列化器
     serializer_class = CommentGoodsSerializer
 
     def get_queryset(self):
