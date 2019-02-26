@@ -9,6 +9,7 @@ var vm = new Vue({
         username: '',
         image_code: '',
         mobile: '',
+        anony_mobile:'',
         access_token: '',
         sms_code: '',
         user_id: '',
@@ -35,6 +36,7 @@ var vm = new Vue({
         is_show_form_3: false,
         is_show_form_4: false,
         is_show_form_5: false,
+        disabled: true,
 
         // 控制进度条显示
         step_class: {
@@ -125,6 +127,11 @@ var vm = new Vue({
                     })
                     .then(response => {
                         this.mobile = response.data.mobile;
+                        var mobile_str = this.mobile;
+                        var mobile_str_left = mobile_str.substring(0,3);
+                        // var mobile_str_middle = mobile_str.substring(3,9);
+                        var mobile_str_right = mobile_str.substring(9,11);
+                        this.anony_mobile = mobile_str_left + "******" + mobile_str_right;
                         this.access_token = response.data.access_token;
                         this.step_class['step-2'] = true;
                         this.step_class['step-1'] = false;
