@@ -62,11 +62,12 @@ var vm = new Vue({
                         location.href = "/user_center_info.html";
                     })
                     .catch(function(error){
-                        if (error.status === 403) {
+                        if (error.status == 403) {
                             alert("403错误");
                             // location = '/index.html?next=/user_center_pass.html';
                         } else {
-                            alert(error.data.message);
+                            // alert(error.message);
+                            alert("原密码错误")
                         }
                     })
             } else {

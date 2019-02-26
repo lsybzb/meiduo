@@ -150,6 +150,9 @@ var vm = new Vue({
                     this.comments = response.data;
                     for(var i=0; i<this.comments.length; i++){
                         this.comments[i].score_class = this.score_classes[this.comments[i].score];
+                        if (this.comments[i].is_anonymous ==true){
+                            this.comments[i].username = "我也匿名一下";
+                        }
                     }
                 })
                 .catch(error => {

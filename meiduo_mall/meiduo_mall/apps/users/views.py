@@ -49,7 +49,7 @@ class ResetPasswords(APIView):
         password2 = data.get('password2')  # 取出数据键为password2
 
         if not user.check_password(old_password):  # 校验原密码是否正确
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "老铁,密码错啦!"}, status=status.HTTP_403_FORBIDDEN)
         # print("原始密码是否正确")
         if not all([old_password, password, password2]):
             return Response({"message": "参数不足!"}, status=status.HTTP_400_BAD_REQUEST)

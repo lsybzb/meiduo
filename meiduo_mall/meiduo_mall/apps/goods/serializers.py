@@ -24,7 +24,7 @@ class SKUCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderGoods
-        fields = ['id', 'comment', 'score', 'username']
+        fields = ['id', 'comment', 'score', 'username', 'is_anonymous']
 
 
 class SKUSerializer(serializers.ModelSerializer):
