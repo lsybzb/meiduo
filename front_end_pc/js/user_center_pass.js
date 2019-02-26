@@ -58,12 +58,12 @@ var vm = new Vue({
                         } 
                     )
                     .then(function(response){
-                        alert('保存成功');
-                        location.href = "/user_center_pass.html";
+                        alert('密码修改成功');
+                        location.href = "/user_center_info.html";
                     })
                     .catch(function(error){
                         if (error.status === 403) {
-                            alert("403错误")
+                            alert("403错误");
                             // location = '/index.html?next=/user_center_pass.html';
                         } else {
                             alert(error.data.message);

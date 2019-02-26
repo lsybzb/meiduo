@@ -34,6 +34,7 @@ var vm = new Vue({
         is_show_form_2: false,
         is_show_form_3: false,
         is_show_form_4: false,
+        is_show_form_5: false,
 
         // 控制进度条显示
         step_class: {
@@ -97,6 +98,20 @@ var vm = new Vue({
             } else {
                 this.error_sms_code = false;
             }
+        },
+        time_count_down: function(){
+            var oDiv = document.getElementById('time_count_down');
+            var time_number = 5;
+            function time_down () {
+                if (time_number>0){
+                    time_number -= 1;
+                    oDiv.innerHTML = time_number + "秒后跳转到登陆界面";
+                }else {
+                    clearInterval(time_down_start);
+                    location.href = "/login.html";
+                }
+            }
+            var time_down_start = setInterval(time_down,1000);
         },
 
         // 第一步表单提交, 获取手机号与发送短信的token
@@ -228,9 +243,11 @@ var vm = new Vue({
                         this.step_class['step-3'] = false;
                         this.is_show_form_3 = false;
                         this.is_show_form_4 = true;
+                        this.is_show_form_5 = true;
+                        this.time_count_down();
                     })
                     .catch(error => {
-                        alert(error.data.message);
+                        alert(error.message);
                         console.log(error.data);
                     })
             }
