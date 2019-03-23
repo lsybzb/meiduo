@@ -1,0 +1,40 @@
+docker fastdfs tracker
+sudo docker run -dti --network=host --name tracker -v /Users/lisi/Course/code/meiduo/fdfs/tracker:/var/fdfs delron/fastdfs tracker
+
+docker fastdfs storage
+sudo docker run -dti --network=host --name storage -e TRACKER_SERVER=118.24.111.111:22122 -v /var/fdfs/storage:/var/fdfs delron/fastdfs storage
+
+
+stop tracker
+sudo docker container stop tracker
+start tracker
+sudo docker container start tracker
+
+
+stop storage
+sudo docker container stop storage
+
+start storage
+sudo docker container start storage
+
+server {
+        listen       80;
+        server_name  localhost;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   /Users/lisi/Course/code/bookweb;
+            index  index.html index.htm;
+        }
+    }
+server {
+        listen       9000;
+        server_name  localhost;
+        location / {
+            root   /Users/lisi/Desktop;
+            index  index.html;
+        }
+    }

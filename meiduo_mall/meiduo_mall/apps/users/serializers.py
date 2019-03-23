@@ -9,47 +9,6 @@ from users.models import User, Address
 from celery_tasks.email.tasks import send_verify_email
 
 
-class AddressTitleSerializer(serializers.ModelSerializer):
-    """修改标题序列化器"""
-
-    class Meta:
-        model = Address
-        fields = ('title',)
-
-
-class UserAddressSerializer(serializers.ModelSerializer):
-    """
-    用户地址序列化器
-    """
-    province = serializers.StringRelatedField(read_only=True)
-    city = serializers.StringRelatedField(read_only=True)
-    district = serializers.StringRelatedField(read_only=True)
-    province_id = serializers.IntegerField(label='省ID', required=True)
-    city_id = serializers.IntegerField(label='市ID', required=True)
-    district_id = serializers.IntegerField(label='区ID', required=True)
-
-    class Meta:
-        model = Address
-        exclude = ('user', 'is_deleted', 'create_time', 'update_time')
-
-    @staticmethod
-    def validate_mobile(value):
-        """
-        验证手机号
-        """
-        if not re.match(r'^1[3-9]\d{9}$', value):
-            raise serializers.ValidationError('手机号格式错误')
-        return value
-
-    def create(self, validated_data):
-        """
-        保存
-        """
-        validated_data['user'] = self.context['request'].user
-        # return super().create(validated_data)
-        return super(UserAddressSerializer, self).create(validated_data)
-
-
 class CreateUserSerializer(serializers.ModelSerializer):
     """
     新建用户序列化器类
@@ -69,7 +28,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'password2', 'mobile', 'sms_code', 'allow', 'token']
-        # 添加字段序列化限制
         extra_kwargs = {
             'username': {
                 'min_length': 5,
@@ -149,6 +107,46 @@ class CreateUserSerializer(serializers.ModelSerializer):
         return user
 
 
+class AddressTitleSerializer(serializers.ModelSerializer):
+    """修改标题序列化器"""
+
+    class Meta:
+        model = Address
+        fields = ('title',)
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    """
+    用户地址序列化器
+    """
+    province = serializers.StringRelatedField(read_only=True)
+    city = serializers.StringRelatedField(read_only=True)
+    district = serializers.StringRelatedField(read_only=True)
+    province_id = serializers.IntegerField(label='省ID', required=True)
+    city_id = serializers.IntegerField(label='市ID', required=True)
+    district_id = serializers.IntegerField(label='区ID', required=True)
+
+    class Meta:
+        model = Address
+        exclude = ('user', 'is_deleted', 'create_time', 'update_time')
+
+    @staticmethod
+    def validate_mobile(value):
+        """
+        验证手机号
+        """
+        if not re.match(r'^1[3-9]\d{9}$', value):
+            raise serializers.ValidationError('手机号格式错误')
+        return value
+
+    def create(self, validated_data):
+        """
+        保存
+        """
+        validated_data['user'] = self.context['request'].user
+        return super(UserAddressSerializer, self).create(validated_data)
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -179,38 +177,40 @@ class EmailSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class AddUserBrowsingHistorySerializer(serializers.Serializer):
+    """添加用户浏览历史记录"""
 
     sku_id = serializers.IntegerField(label="商品SKU编码", min_value=1)
 
     def validate_sku_id(self, data):
         """校验sku_id"""
 
-        # 判断sku_id是否存在
         try:
             SKU.objects.get(id=data)
         except SKU.DoesNotExist:
             raise serializers.ValidationError("该商品不存在")
 
-        # 存在则返回data
         return data
 
     def create(self, validated_data):
-        """保存sku_id到redis数据库中"""
-
-        # 获取用户id
+        """
+        保存sku_id到redis数据库中
+        1.获取用户id
+        2.获取sku_id
+        3.建立redis数据库连接对象
+        4.将redis中存在的相同的sku_id全部删除
+        5.将记录存入redis中
+        6.限制redis中一个用户浏览记录列表最多保存5条记录
+        7.执行管道命令
+        8.返回validated_data
+        """
         user_id = self.context['request'].user.id
-        # 获取sku_id
         sku_id = validated_data.get('sku_id')
-        # 建立redis数据库连接对象
         redis_conn = get_redis_connection('history')
         pl = redis_conn.pipeline()
-        # 将redis中存在的相同的sku_id全部删除
         pl.lrem('history_%s' % user_id, 0, sku_id)
-        # 将记录存入redis中
         pl.lpush('history_%s' % user_id, sku_id)
-        # 限制redis中一个用户浏览记录列表最多保存5条记录
-        pl.ltrim('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT-1)
-        pl.execute()    # 执行管道命令
-        # 返回validated_data
+        pl.ltrim('history_%s' % user_id, 0, constants.USER_BROWSING_HISTORY_COUNTS_LIMIT - 1)
+        pl.execute()
         return validated_data

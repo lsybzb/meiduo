@@ -19,7 +19,7 @@ import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 为apps中的子应用添加导包路径
-sys.path.insert(0,os.path.join(BASE_DIR, 'apps'))
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -30,8 +30,7 @@ SECRET_KEY = 'crjyg*wri(ck5^3+!*etzxpov9fhtfwv9+#h6zcmi07y$jph75'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.meiduo.site', 'api.meiduo.site', '192.168.40.131']
-
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.meiduo.site', 'api.meiduo.site', '118.24.111.111']
 
 # Application definition
 
@@ -45,11 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # ----------第三方应用----------
-    'rest_framework', # DRF模块
-    'corsheaders',  #
-    'ckeditor', # 富文本编辑器
-    'ckeditor_uploader', # 富文本编辑器上传图片模块
-    'django_crontab', # 定时生成首页任务
+    'rest_framework',  # DRF模块
+    'corsheaders',  # 跨域请求应用
+    'ckeditor',  # 富文本编辑器
+    'ckeditor_uploader',  # 富文本编辑器上传图片模块
+    'django_crontab',  # 定时生成首页任务
 
     # ----------自建应用----------
     # 用户模型应用
@@ -75,10 +74,8 @@ INSTALLED_APPS = [
 # 重新指定用户模型类
 AUTH_USER_MODEL = 'users.User'
 
-
 MIDDLEWARE = [
-    # 添加跨域请求中间件
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 添加跨域请求中间件
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -111,14 +108,13 @@ GENERATED_STATIC_HTML_FILES_DIR = os.path.join(os.path.dirname(os.path.dirname(B
 
 WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 # 配置mysql服务器
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.40.131',  # 数据库主机(虚拟机,固定ip)
+        'HOST': '127.0.0.1',  # 数据库主机(虚拟机,固定ip)
         'PORT': 3306,  # 数据库端口
         'USER': 'meiduo',  # 数据库用户名
         'PASSWORD': 'meiduo',  # 数据库用户密码
@@ -127,44 +123,44 @@ DATABASES = {
 }
 # 配置redis服务器
 CACHES = {
-    "default": {   # 指定默认的信息存储位置
+    "default": {  # 指定默认的信息存储位置
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/0",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "session": {   # 指定session存储位置与名称
+    "session": {  # 指定session存储位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/1",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "verify_code": {  # 指定存储短信码的位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/2",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "history": {   # 用户浏览记录
+    "history": {  # 用户浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/3",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "cart": {
+    "cart": {  # 购物车
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/4",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
-    },
+    },  # 图片验证码
     "image_codes": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.40.131:6379/4",
+        "LOCATION": "redis://:meiduo@127.0.0.1:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -191,7 +187,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 # 设置本地化语言为中文
@@ -208,11 +203,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'front_end_pc/static')
+
 # 添加日志配置
 LOGGING = {
     'version': 1,
@@ -232,7 +229,7 @@ LOGGING = {
     },
     'handlers': {  # 日志处理方法
         'console': {  # 向终端中输出日志
-            'level': 'INFO',
+            'level': 'INFO',  # 日志级别
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
@@ -256,7 +253,7 @@ LOGGING = {
 }
 # REST framework配置信息
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler', # 指定自定义处理函数,加入MySQL与Redis
+    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',  # 指定自定义处理函数,加入MySQL与Redis
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -269,17 +266,17 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:8080',
     'localhost:8080',
-    'www.meiduo.site:8080', # 前端域名别名
-    'api.meiduo.site:8000', # 后端位置
+    'www.meiduo.site:8080',  # 前端域名别名
+    'api.meiduo.site:8000',  # 后端位置
+    'www.meiduo.site'
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 
 # JWT 设置
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),   # 设置jwt过期时间
-    "JWT_RESPONSE_PAYLOAD_HANDLER": 'users.utils.jwt_response_payload_handler', # 指定自定义jwt处理函数
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),  # 设置jwt过期时间
+    "JWT_RESPONSE_PAYLOAD_HANDLER": 'users.utils.jwt_response_payload_handler',  # 指定自定义jwt处理函数
 }
-
 
 AUTHENTICATION_BACKENDS = [
     'users.utils.UsernameMobileAuthBackend',
@@ -294,11 +291,11 @@ QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.163.com'
 EMAIL_PORT = 25
-#发送邮件的邮箱
+# 发送邮件的邮箱
 EMAIL_HOST_USER = 'wwww164@163.com'
-#在邮箱中设置的客户端授权密码
+# 在邮箱中设置的客户端授权密码
 EMAIL_HOST_PASSWORD = 'test12345678'
-#收件人看到的发件人
+# 收件人看到的发件人
 EMAIL_FROM = 'python<wwww164@163.com>'
 
 # DRF扩展
@@ -329,7 +326,8 @@ CKEDITOR_UPLOAD_PATH = ''  # 上传图片保存路径，使用了FastDFS，所�
 # 定时任务配置
 CRONJOBS = [
     # 5分钟执行一次静态主页文件
-    ('*/1 * * * *', 'contents.crons.generate_static_index_html', '>> /Users/lisi/Course/code/bk_course/python_08_mdproject/meiduo/meiduo_mall/logs/crontab.log')
+    ('*/1 * * * *', 'contents.crons.generate_static_index_html',
+     '>> /Users/lisi/Course/code/bk_course/python_08_mdproject/meiduo/meiduo_mall/logs/crontab.log')
 ]
 
 # 解决crontab中文问题

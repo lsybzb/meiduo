@@ -38,23 +38,18 @@ class ResetPasswords(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        # print("进入了修改密码put视图")
-        user = self.request.user  # 获取当前登录用户
-
-        data = request.data  # 获取前端请求体中的数据
-
+        user = self.request.user
+        data = request.data
         old_password = data.get('old_password')  # 取出数据键为old_password
-
         password = data.get('password')  # 取出数据键为password
         password2 = data.get('password2')  # 取出数据键为password2
 
         if not user.check_password(old_password):  # 校验原密码是否正确
             return Response({"message": "老铁,密码错啦!"}, status=status.HTTP_403_FORBIDDEN)
-        # print("原始密码是否正确")
         if not all([old_password, password, password2]):
             return Response({"message": "参数不足!"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if password != password2:  # 判断新密码和确认密码是否相等
+        if password != password2:
             return Response({"message": "新密码不一致!"}, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(password)
@@ -267,12 +262,13 @@ class AddressViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
 
 
 class UsernameCountView(APIView):
-    """获取用户名数量"""
+    """
+    注册时检查用户名是否存在
+    检查通过该用户名获取到的用户数量是否大于0
+    """
 
     def get(self, request, username):
-        # 查询传入的用户名的数量
         count = User.objects.filter(username=username).count()
-
         data = {
             'username': username,
             'count': count
@@ -281,17 +277,16 @@ class UsernameCountView(APIView):
 
 
 class MobileCountView(APIView):
-    """获取手机数量"""
-
+    """
+    注册时检查手机号是否存在
+    检查通过该手机号获取到的用户数量是否大于0
+    """
     def get(self, request, mobile):
-        # 查询传入的手机号码的数量
         count = User.objects.filter(mobile=mobile).count()
-        # 组织返回数据
         data = {
             'mobile': mobile,
             'count': count
         }
-        # 返回数据
         return Response(data)
 
 
