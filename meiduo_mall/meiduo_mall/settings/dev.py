@@ -125,42 +125,42 @@ DATABASES = {
 CACHES = {
     "default": {  # 指定默认的信息存储位置
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/0",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "session": {  # 指定session存储位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/1",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "verify_code": {  # 指定存储短信码的位置与名称
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/2",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "history": {  # 用户浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/3",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "cart": {  # 购物车
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/4",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },  # 图片验证码
     "image_codes": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:meiduo@127.0.0.1:6379/4",
+        "LOCATION": "redis://:meiduo@118.24.111.111:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
